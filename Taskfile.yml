@@ -1,9 +1,5 @@
 version: "3"
 
-vars:
-  # Last version of ajv-cli with support for the JSON schema "Draft 4" specification
-  SCHEMA_DRAFT_4_AJV_CLI_VERSION: 3.3.0
-
 tasks:
   build:
     desc: Build the project
@@ -44,8 +40,8 @@ tasks:
     deps:
       - task: npm:install-deps
     cmds:
-      - wget --quiet --output-document="{{.ACTION_METADATA_SCHEMA_PATH}}" https://json.schemastore.org/github-action
-      - npx ajv-cli validate --strict=false -s "{{.ACTION_METADATA_SCHEMA_PATH}}" -d "action.yml"
+      - wget --quiet --output-document="{{.ACTION_METADATA_SCHEMA_PATH}}.json" https://json.schemastore.org/github-action
+      - npx ajv-cli validate --strict=false -s "{{.ACTION_METADATA_SCHEMA_PATH}}.json" -d "action.yml"
 
   docs:generate:
     desc: Create all generated documentation content
@@ -238,9 +234,12 @@ tasks:
       - wget --quiet --output-document="{{.SEMANTIC_RELEASE_SCHEMA_PATH}}" {{.SEMANTIC_RELEASE_SCHEMA_URL}}
       - wget --quiet --output-document="{{.STYLELINTRC_SCHEMA_PATH}}" {{.STYLELINTRC_SCHEMA_URL}}
       - |
-        cd "{{.WORKING_FOLDER}}"  # Workaround for https://github.com/npm/cli/issues/3210
-        npx ajv-cli@{{.SCHEMA_DRAFT_4_AJV_CLI_VERSION}} validate \
+        npx ajv-cli validate \
           --all-errors \
+          --allow-union-types \
+          -c ajv-formats \
+          --allow-matching-properties \
+          --strict=false \
           -s "{{.SCHEMA_PATH}}" \
           -r "{{.AVA_SCHEMA_PATH}}" \
           -r "{{.BASE_SCHEMA_PATH}}" \
@@ -316,9 +315,12 @@ tasks:
           --output-document="{{.SCHEMA_PATH}}" \
           {{.SCHEMA_URL}}
       - |
-        cd "{{.WORKING_FOLDER}}"  # Workaround for https://github.com/npm/cli/issues/3210
-        npx ajv-cli@{{.SCHEMA_DRAFT_4_AJV_CLI_VERSION}} validate \
+        npx ajv-cli migrate \
+            -s "{{.SCHEMA_PATH}}"
+        
+        npx ajv-cli validate \
           --all-errors \
+          --strict=false \
           -s "{{.SCHEMA_PATH}}" \
           -d "{{.WORKING_INSTANCE_PATH}}"
 
