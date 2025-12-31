@@ -27,8 +27,6 @@ import * as installer from "../src/installer";
 
 describe("installer tests", () => {
   beforeEach(async () => {
-    nock.cleanAll();
-    nock.enableNetConnect();
     await io.rmRF(toolDir);
     await io.rmRF(tempDir);
     await io.mkdirP(toolDir);
@@ -59,7 +57,6 @@ describe("installer tests", () => {
 
   describe("Gets the latest release of Task", () => {
     beforeEach(() => {
-      nock.enableNetConnect(/github\.com|githubusercontent\.com/);
       nock("https://api.github.com")
         .get("/repos/go-task/task/releases?per_page=100")
         .replyWithFile(200, path.join(dataDir, "releases.json"));
