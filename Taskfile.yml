@@ -301,7 +301,7 @@ tasks:
       - |
         # TypeScript allows comments in tsconfig.json.
         # ajv-cli did not support comments in JSON at the 3.x version in use (support was added in a later version).
-        pnpm exec strip-json-comments-cli \
+        pnpm exec strip-json-comments \
           --no-whitespace \
           "{{.INSTANCE_PATH}}" \
           > "{{.WORKING_INSTANCE_PATH}}"
