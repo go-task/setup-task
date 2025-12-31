@@ -78,8 +78,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           version: 5.x
-
-
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
@@ -137,8 +135,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           version: 5.x
-
-
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
