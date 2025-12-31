@@ -42,7 +42,7 @@ tasks:
       - task: npm:install-deps
     cmds:
       - wget --quiet --output-document="{{.ACTION_METADATA_SCHEMA_PATH}}" https://json.schemastore.org/github-action
-      - pnpm exec ajv-cli validate --strict=false -s "{{.ACTION_METADATA_SCHEMA_PATH}}" -d "action.yml"
+      - pnpm exec ajv validate --strict=false -s "{{.ACTION_METADATA_SCHEMA_PATH}}" -d "action.yml"
 
   docs:generate:
     desc: Create all generated documentation content
