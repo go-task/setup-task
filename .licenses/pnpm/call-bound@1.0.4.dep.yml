@@ -1,9 +1,0 @@
----
-name: call-bound
-version: 1.0.4
-type: pnpm
-summary: Robust call-bound JavaScript intrinsics, using `call-bind` and `get-intrinsic`.
-homepage: https://github.com/ljharb/call-bound#readme
-license: none
-licenses: []
-notices: []

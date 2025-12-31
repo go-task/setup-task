@@ -1,9 +1,0 @@
----
-name: call-bind-apply-helpers
-version: 1.0.2
-type: pnpm
-summary: Helper functions around Function call/apply/bind, for use in `call-bind`
-homepage: https://github.com/ljharb/call-bind-apply-helpers#readme
-license: none
-licenses: []
-notices: []

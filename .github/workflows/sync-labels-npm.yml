@@ -13,14 +13,14 @@ on:
       - ".github/label-configuration-files/*.ya?ml"
       - ".npmrc"
       - "package.json"
-      - "pnpm-lock.yaml"
+      - "package-lock.json"
   pull_request:
     paths:
       - ".github/workflows/sync-labels-npm.ya?ml"
       - ".github/label-configuration-files/*.ya?ml"
       - ".npmrc"
       - "package.json"
-      - "pnpm-lock.yaml"
+      - "package-lock.json"
   schedule:
     # Run daily at 8 AM UTC to sync with changes to shared label configurations.
     - cron: "0 8 * * *"
@@ -35,14 +35,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
-          cache: "pnpm"
+          cache: "npm"
 
       - name: Download JSON schema for labels configuration file
         id: download-schema
@@ -52,12 +50,12 @@ jobs:
           location: ${{ runner.temp }}/label-configuration-schema
 
       - name: Install JSON schema validator
-        run: pnpm install
+        run: npm ci
 
       - name: Validate local labels configuration
         run: |
           # See: https://github.com/ajv-validator/ajv-cli#readme
-          pnpm exec ajv-cli validate \
+          npx ajv-cli validate \
             --all-errors \
             -c ajv-formats \
             -s "${{ steps.download-schema.outputs.file-path }}" \
@@ -131,14 +129,12 @@ jobs:
         with:
           name: ${{ env.CONFIGURATIONS_ARTIFACT_PREFIX }}*
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
-          cache: "pnpm"
+          cache: "npm"
 
       - name: Merge label configuration files
         run: |
@@ -147,15 +143,14 @@ jobs:
           cat "${{ env.CONFIGURATIONS_FOLDER }}"/*.@(yml|yaml) > "${{ env.MERGED_CONFIGURATION_PATH }}"
 
       - name: Install github-label-sync
-        run: pnpm install
+        run: npm ci
 
       - name: Sync labels
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # See: https://github.com/Financial-Times/github-label-sync
-          pnpm exec \
-            github-label-sync \
+          npx github-label-sync \
               --labels "${{ env.MERGED_CONFIGURATION_PATH }}" \
               ${{ steps.dry-run.outputs.flag }} \
               ${{ github.repository }}

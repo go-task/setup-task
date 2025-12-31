@@ -1,9 +1,0 @@
----
-name: typed-rest-client
-version: 2.1.0
-type: pnpm
-summary: Node Rest and Http Clients for use with TypeScript
-homepage: https://github.com/Microsoft/typed-rest-client#readme
-license: none
-licenses: []
-notices: []

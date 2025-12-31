@@ -1,9 +1,0 @@
----
-name: "@actions/http-client"
-version: 2.2.3
-type: pnpm
-summary: Actions Http Client
-homepage: https://github.com/actions/toolkit/tree/main/packages/http-client
-license: none
-licenses: []
-notices: []

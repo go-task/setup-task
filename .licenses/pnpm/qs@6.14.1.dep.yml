@@ -1,9 +1,0 @@
----
-name: qs
-version: 6.14.1
-type: pnpm
-summary: A querystring parser that supports nesting and arrays, with a depth limit
-homepage: https://github.com/ljharb/qs
-license: none
-licenses: []
-notices: []

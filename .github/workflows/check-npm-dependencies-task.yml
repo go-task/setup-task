@@ -14,7 +14,7 @@ on:
       - "**/.gitmodules"
       - "**/.npmrc"
       - "**/package.json"
-      - "**/pnpm-lock.yaml"
+      - "**/package-lock.json"
   pull_request:
     paths:
       - ".github/workflows/check-npm-dependencies-task.ya?ml"
@@ -25,7 +25,7 @@ on:
       - "**/.gitmodules"
       - "**/.npmrc"
       - "**/package.json"
-      - "**/pnpm-lock.yaml"
+      - "**/package-lock.json"
   schedule:
     # Run periodically to catch breakage caused by external changes.
     - cron: "0 8 * * WED"
@@ -79,14 +79,12 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           version: 5.x
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
-          cache: "pnpm"
+          cache: "npm"
 
       - name: Install Task
         uses: go-task/setup-task@v1
@@ -140,14 +138,12 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           version: 5.x
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
-          cache: "pnpm"
+          cache: "npm"
 
       - name: Install Task
         uses: go-task/setup-task@v1

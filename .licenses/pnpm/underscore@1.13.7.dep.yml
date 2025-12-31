@@ -1,9 +1,0 @@
----
-name: underscore
-version: 1.13.7
-type: pnpm
-summary: JavaScript's functional programming helper library.
-homepage: https://underscorejs.org
-license: none
-licenses: []
-notices: []

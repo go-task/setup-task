@@ -1,9 +1,0 @@
----
-name: js-md4
-version: 0.3.2
-type: pnpm
-summary: A simple MD4 hash function for JavaScript supports UTF-8 encoding.
-homepage: https://github.com/emn178/js-md4
-license: none
-licenses: []
-notices: []

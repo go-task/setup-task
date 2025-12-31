@@ -1,9 +1,0 @@
----
-name: get-proto
-version: 1.0.1
-type: pnpm
-summary: Robustly get the [[Prototype]] of an object
-homepage: https://github.com/ljharb/get-proto#readme
-license: none
-licenses: []
-notices: []

@@ -1,9 +1,0 @@
----
-name: gopd
-version: 1.2.0
-type: pnpm
-summary: "`Object.getOwnPropertyDescriptor`, but accounts for IE's broken implementation."
-homepage: https://github.com/ljharb/gopd#readme
-license: none
-licenses: []
-notices: []

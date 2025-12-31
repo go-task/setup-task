@@ -1,9 +1,0 @@
----
-name: side-channel-weakmap
-version: 1.0.2
-type: pnpm
-summary: Store information about any JS value in a side channel. Uses WeakMap if available.
-homepage: https://github.com/ljharb/side-channel-weakmap#readme
-license: none
-licenses: []
-notices: []
