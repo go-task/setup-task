@@ -155,7 +155,7 @@ tasks:
     deps:
       - task: npm:install-deps
     cmds:
-      - pnpm exec markdownlint-cli --fix "**/*.md"
+      - pnpm exec markdownlint --fix "**/*.md"
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-markdown-task/Taskfile.yml
   markdown:lint:
@@ -163,7 +163,7 @@ tasks:
     deps:
       - task: npm:install-deps
     cmds:
-      - pnpm exec markdownlint-cli "**/*.md"
+      - pnpm exec markdownlint "**/*.md"
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/npm-task/Taskfile.yml
   npm:install-deps:
