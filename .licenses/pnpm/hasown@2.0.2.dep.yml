@@ -1,0 +1,9 @@
+---
+name: hasown
+version: 2.0.2
+type: pnpm
+summary: A robust, ES3 compatible, "has own property" predicate.
+homepage: https://github.com/inspect-js/hasOwn#readme
+license: none
+licenses: []
+notices: []

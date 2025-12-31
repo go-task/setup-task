@@ -1,0 +1,9 @@
+---
+name: dunder-proto
+version: 1.0.1
+type: pnpm
+summary: If available, the `Object.prototype.__proto__` accessor and mutator, call-bound
+homepage: https://github.com/es-shims/dunder-proto#readme
+license: none
+licenses: []
+notices: []

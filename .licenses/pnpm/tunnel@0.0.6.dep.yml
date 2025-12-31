@@ -1,0 +1,9 @@
+---
+name: tunnel
+version: 0.0.6
+type: pnpm
+summary: Node HTTP/HTTPS Agents for tunneling proxies
+homepage: https://github.com/koichik/node-tunnel/
+license: none
+licenses: []
+notices: []

@@ -1,0 +1,9 @@
+---
+name: es-define-property
+version: 1.0.1
+type: pnpm
+summary: "`Object.defineProperty`, but not IE 8's broken one."
+homepage: https://github.com/ljharb/es-define-property#readme
+license: none
+licenses: []
+notices: []

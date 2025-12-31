@@ -1,0 +1,9 @@
+---
+name: side-channel-map
+version: 1.0.1
+type: pnpm
+summary: Store information about any JS value in a side channel, using a Map
+homepage: https://github.com/ljharb/side-channel-map#readme
+license: none
+licenses: []
+notices: []

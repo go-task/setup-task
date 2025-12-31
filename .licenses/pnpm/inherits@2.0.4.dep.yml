@@ -1,0 +1,9 @@
+---
+name: inherits
+version: 2.0.4
+type: pnpm
+summary: Browser-friendly inheritance fully compatible with standard node.js inherits()
+homepage: https://github.com/isaacs/inherits#readme
+license: none
+licenses: []
+notices: []

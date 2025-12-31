@@ -1,0 +1,9 @@
+---
+name: "@actions/core"
+version: 1.11.1
+type: pnpm
+summary: Actions core lib
+homepage: https://github.com/actions/toolkit/tree/main/packages/core
+license: none
+licenses: []
+notices: []
