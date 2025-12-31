@@ -1,0 +1,9 @@
+---
+name: semver
+version: 7.7.3
+type: pnpm
+summary: The semantic version parser used by npm.
+homepage: https://github.com/npm/node-semver#readme
+license: none
+licenses: []
+notices: []

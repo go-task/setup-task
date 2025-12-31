@@ -1,0 +1,9 @@
+---
+name: es-errors
+version: 1.3.0
+type: pnpm
+summary: A simple cache for a few of the JS Error constructors.
+homepage: https://github.com/ljharb/es-errors#readme
+license: none
+licenses: []
+notices: []

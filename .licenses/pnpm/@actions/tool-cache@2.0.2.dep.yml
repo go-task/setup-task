@@ -1,0 +1,9 @@
+---
+name: "@actions/tool-cache"
+version: 2.0.2
+type: pnpm
+summary: Actions tool-cache lib
+homepage: https://github.com/actions/toolkit/tree/main/packages/tool-cache
+license: none
+licenses: []
+notices: []

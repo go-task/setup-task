@@ -1,0 +1,9 @@
+---
+name: "@fastify/busboy"
+version: 2.1.1
+type: pnpm
+summary: A streaming parser for HTML form data for node.js
+homepage: https://github.com/fastify/busboy#readme
+license: none
+licenses: []
+notices: []
