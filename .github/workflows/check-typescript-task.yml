@@ -8,7 +8,7 @@ on:
       - "oxlint.json"
       - ".npmrc"
       - "package.json"
-      - "pnpm-lock.yaml"
+      - "package-lock.json"
       - "Taskfile.ya?ml"
       - "tsconfig.json"
       - "**.js"
@@ -21,7 +21,7 @@ on:
       - "oxlint.json"
       - ".npmrc"
       - "package.json"
-      - "pnpm-lock.yaml"
+      - "package-lock.json"
       - "Taskfile.ya?ml"
       - "tsconfig.json"
       - "**.js"
@@ -42,14 +42,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
-          cache: "pnpm"
+          cache: "npm"
 
       - name: Install Task
         uses: go-task/setup-task@v1

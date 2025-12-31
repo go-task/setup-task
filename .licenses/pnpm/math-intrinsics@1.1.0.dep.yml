@@ -1,9 +1,0 @@
----
-name: math-intrinsics
-version: 1.1.0
-type: pnpm
-summary: ES Math-related intrinsics and helpers, robustly cached.
-homepage: https://github.com/es-shims/math-intrinsics#readme
-license: none
-licenses: []
-notices: []
