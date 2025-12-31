@@ -9,7 +9,7 @@ on:
       - ".markdown-link-check.json"
       - ".npmrc"
       - "package.json"
-      - "package-lock.json"
+      - "pnpm-lock.yaml"
       - "Taskfile.ya?ml"
       - "**/.markdownlint*"
       - "**.mdx?"
@@ -22,7 +22,7 @@ on:
       - ".markdown-link-check.json"
       - ".npmrc"
       - "package.json"
-      - "package-lock.json"
+      - "pnpm-lock.yaml"
       - "Taskfile.ya?ml"
       - "**/.markdownlint*"
       - "**.mdx?"
@@ -43,10 +43,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
+          cache: "pnpm"
 
       - name: Initialize markdownlint-cli problem matcher
         uses: xt0rted/markdownlint-problem-matcher@v3
@@ -67,10 +71,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
+          cache: "pnpm"
 
       - name: Install Task
         uses: go-task/setup-task@v1

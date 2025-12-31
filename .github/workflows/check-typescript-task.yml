@@ -5,13 +5,11 @@ on:
   push:
     paths:
       - ".github/workflows/check-typescript-task.ya?ml"
-      - ".eslintignore"
-      - "**/.eslintrc*"
+      - "oxlint.json"
       - ".npmrc"
       - "package.json"
-      - "package-lock.json"
+      - "pnpm-lock.yaml"
       - "Taskfile.ya?ml"
-      - "tsconfig.eslint.json"
       - "tsconfig.json"
       - "**.js"
       - "**.jsx"
@@ -20,13 +18,11 @@ on:
   pull_request:
     paths:
       - ".github/workflows/check-typescript-task.ya?ml"
-      - ".eslintignore"
-      - "**/.eslintrc*"
+      - "oxlint.json"
       - ".npmrc"
       - "package.json"
-      - "package-lock.json"
+      - "pnpm-lock.yaml"
       - "Taskfile.ya?ml"
-      - "tsconfig.eslint.json"
       - "tsconfig.json"
       - "**.js"
       - "**.jsx"
@@ -46,10 +42,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
+          cache: "pnpm"
 
       - name: Install Task
         uses: go-task/setup-task@v1

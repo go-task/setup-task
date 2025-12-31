@@ -23,9 +23,6 @@ tasks:
       - task: ts:validate
         vars:
           TSCONFIG_PATH: "./tsconfig.json"
-      - task: ts:validate
-        vars:
-          TSCONFIG_PATH: "./tsconfig.eslint.json"
 
   fix:
     desc: Make automated corrections to the project's files
@@ -45,7 +42,7 @@ tasks:
       - task: npm:install-deps
     cmds:
       - wget --quiet --output-document="{{.ACTION_METADATA_SCHEMA_PATH}}" https://json.schemastore.org/github-action
-      - npx ajv-cli validate --strict=false -s "{{.ACTION_METADATA_SCHEMA_PATH}}" -d "action.yml"
+      - pnpm exec ajv-cli validate --strict=false -s "{{.ACTION_METADATA_SCHEMA_PATH}}" -d "action.yml"
 
   docs:generate:
     desc: Create all generated documentation content
@@ -100,7 +97,7 @@ tasks:
     deps:
       - task: npm:install-deps
     cmds:
-      - npx prettier --write .
+      - pnpm exec prettier --write .
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-npm-dependencies-task/Taskfile.yml
   general:install-deps:
@@ -117,7 +114,7 @@ tasks:
     cmds:
       - |
         if [[ "{{.OS}}" == "Windows_NT" ]]; then
-          # npx --call uses the native shell, which makes it too difficult to use npx for this application on Windows,
+          # pnpm dlx uses the native shell, which makes it too difficult to use it for this application on Windows,
           # so the Windows user is required to have markdown-link-check installed and in PATH.
           if ! which markdown-link-check &>/dev/null; then
             echo "markdown-link-check not found or not in PATH. Please install: https://github.com/tcort/markdown-link-check#readme"
@@ -140,18 +137,16 @@ tasks:
           done
           exit $STATUS
         else
-          npx --package=markdown-link-check --call='
-            STATUS=0
-            for file in \
-              $(find . -type d -name node_modules -prune -o -regex ".*[.]md" -print); do
-              markdown-link-check \
-                --quiet \
-                --config "./.markdown-link-check.json" \
-                "$file"
-              STATUS=$(( $STATUS + $? ))
-            done
-            exit $STATUS
-          '
+          STATUS=0
+          for file in \
+            $(find . -type d -name node_modules -prune -o -regex ".*[.]md" -print); do
+            pnpm exec markdown-link-check \
+              --quiet \
+              --config "./.markdown-link-check.json" \
+              "$file"
+            STATUS=$(( $STATUS + $? ))
+          done
+          exit $STATUS
         fi
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-markdown-task/Taskfile.yml
@@ -160,7 +155,7 @@ tasks:
     deps:
       - task: npm:install-deps
     cmds:
-      - npx markdownlint-cli --fix "**/*.md"
+      - pnpm exec markdownlint-cli --fix "**/*.md"
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-markdown-task/Taskfile.yml
   markdown:lint:
@@ -168,13 +163,13 @@ tasks:
     deps:
       - task: npm:install-deps
     cmds:
-      - npx markdownlint-cli "**/*.md"
+      - pnpm exec markdownlint-cli "**/*.md"
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/npm-task/Taskfile.yml
   npm:install-deps:
-    desc: Install dependencies managed by npm
+    desc: Install dependencies managed by pnpm
     cmds:
-      - npm install
+      - pnpm install
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-npm-task/Taskfile.yml
   npm:validate:
@@ -239,7 +234,7 @@ tasks:
       - wget --quiet --output-document="{{.STYLELINTRC_SCHEMA_PATH}}" {{.STYLELINTRC_SCHEMA_URL}}
       - |
         cd "{{.WORKING_FOLDER}}"  # Workaround for https://github.com/npm/cli/issues/3210
-        npx ajv-cli@{{.SCHEMA_DRAFT_4_AJV_CLI_VERSION}} validate \
+        pnpm dlx ajv-cli@{{.SCHEMA_DRAFT_4_AJV_CLI_VERSION}} validate \
           --all-errors \
           -s "{{.SCHEMA_PATH}}" \
           -r "{{.AVA_SCHEMA_PATH}}" \
@@ -264,29 +259,29 @@ tasks:
     deps:
       - task: npm:install-deps
     cmds:
-      - npx tsc
-      - npx ncc build
+      - pnpm exec tsc
+      - pnpm exec ncc build
 
   ts:fix-lint:
     desc: Fix TypeScript code linting violations
     deps:
       - task: npm:install-deps
     cmds:
-      - npx eslint --ext .js,.jsx,.ts,.tsx --fix .
+      - pnpm oxlint src/ __tests__/ --fix
 
   ts:lint:
     desc: Lint TypeScript code
     deps:
       - task: npm:install-deps
     cmds:
-      - npx eslint --ext .js,.jsx,.ts,.tsx .
+      - pnpm oxlint src/ __tests__/
 
   ts:test:
     desc: Test the action's TypeScript code.
     deps:
       - task: npm:install-deps
     cmds:
-      - npx jest
+      - pnpm vitest run
 
   ts:validate:
     desc: Validate TypeScript configuration file against its JSON schema
@@ -306,7 +301,7 @@ tasks:
       - |
         # TypeScript allows comments in tsconfig.json.
         # ajv-cli did not support comments in JSON at the 3.x version in use (support was added in a later version).
-        npx strip-json-comments-cli \
+        pnpm exec strip-json-comments-cli \
           --no-whitespace \
           "{{.INSTANCE_PATH}}" \
           > "{{.WORKING_INSTANCE_PATH}}"
@@ -317,7 +312,7 @@ tasks:
           {{.SCHEMA_URL}}
       - |
         cd "{{.WORKING_FOLDER}}"  # Workaround for https://github.com/npm/cli/issues/3210
-        npx ajv-cli@{{.SCHEMA_DRAFT_4_AJV_CLI_VERSION}} validate \
+        pnpm dlx ajv-cli@{{.SCHEMA_DRAFT_4_AJV_CLI_VERSION}} validate \
           --all-errors \
           -s "{{.SCHEMA_PATH}}" \
           -d "{{.WORKING_INSTANCE_PATH}}"
