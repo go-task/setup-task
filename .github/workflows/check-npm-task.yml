@@ -8,14 +8,14 @@ on:
       - ".github/workflows/check-npm-task.ya?ml"
       - "**/.npmrc"
       - "**/package.json"
-      - "**/package-lock.json"
+      - "**/pnpm-lock.yaml"
       - "Taskfile.ya?ml"
   pull_request:
     paths:
       - ".github/workflows/check-npm-task.ya?ml"
       - "**/.npmrc"
       - "**/package.json"
-      - "**/package-lock.json"
+      - "**/pnpm-lock.yaml"
       - "Taskfile.ya?ml"
   schedule:
     # Run every Tuesday at 8 AM UTC to catch breakage resulting from changes to the JSON schema.
@@ -34,10 +34,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
+          cache: "pnpm"
 
       - name: Install Task
         uses: go-task/setup-task@v1
@@ -55,10 +59,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
+          cache: "pnpm"
 
       - name: Install Task
         uses: go-task/setup-task@v1
@@ -66,8 +74,8 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           version: 3.x
 
-      - name: Install npm dependencies
+      - name: Install pnpm dependencies
         run: task npm:install-deps
 
-      - name: Check package-lock.json
-        run: git diff --color --exit-code package-lock.json
+      - name: Check pnpm-lock.yaml
+        run: git diff --color --exit-code pnpm-lock.yaml
