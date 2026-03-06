@@ -13,6 +13,10 @@ inputs:
     description: "Token with permissions to do repo things"
     required: false
     default: "${{ github.token }}"
+  max-retries:
+    description: "Maximum number of retry attempts for HTTP requests"
+    required: false
+    default: "3"
 
 runs:
   using: "node20"

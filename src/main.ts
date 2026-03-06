@@ -17,8 +17,9 @@ async function run() {
   try {
     const version = core.getInput("version", { required: true });
     const repoToken = core.getInput("repo-token");
+    const maxRetries = parseInt(core.getInput("max-retries") || "3", 10);
 
-    await installer.getTask(version, repoToken);
+    await installer.getTask(version, repoToken, maxRetries);
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error.message);
