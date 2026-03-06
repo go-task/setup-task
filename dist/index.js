@@ -1,6 +1,315 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 8328:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+// Copyright (c) 2019 ARDUINO SA
+//
+// The software is released under the GNU General Public License, which covers the main body
+// of the arduino/setup-task code. The terms of this license can be found at:
+// https://www.gnu.org/licenses/gpl-3.0.en.html
+//
+// You can be released from the requirements of the above licenses by purchasing
+// a commercial license. Buying such a license is mandatory if you want to modify or
+// otherwise use the software for commercial activities involving the Arduino
+// software without disclosing the source code of your own applications. To purchase
+// a commercial license, send an email to license@arduino.cc
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getTask = getTask;
+const os = __importStar(__nccwpck_require__(857));
+const path = __importStar(__nccwpck_require__(6928));
+const util = __importStar(__nccwpck_require__(9023));
+const restm = __importStar(__nccwpck_require__(3338));
+const semver = __importStar(__nccwpck_require__(2088));
+const core = __importStar(__nccwpck_require__(7484));
+const tc = __importStar(__nccwpck_require__(3472));
+const io = __nccwpck_require__(4994);
+const osPlat = os.platform();
+const osArch = os.arch();
+// Retrieve a list of versions scraping tags from the Github API
+function fetchVersions(repoToken, maxRetries) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let rest;
+        if (repoToken !== "") {
+            rest = new restm.RestClient("setup-task", "", [], {
+                headers: { Authorization: `Bearer ${repoToken}` },
+                allowRetries: true,
+                maxRetries,
+            });
+        }
+        else {
+            rest = new restm.RestClient("setup-task", "", [], {
+                allowRetries: true,
+                maxRetries,
+            });
+        }
+        const tags = (yield rest.get("https://api.github.com/repos/go-task/task/releases?per_page=100")).result || [];
+        return tags.map((tag) => tag.tag_name.replace(/^v/, ""));
+    });
+}
+// Make partial versions semver compliant.
+function normalizeVersion(version) {
+    const preStrings = ["beta", "rc", "preview"];
+    const versionPart = version.split(".");
+    if (versionPart[1] == null) {
+        // append minor and patch version if not available
+        // e.g. 2 -> 2.0.0
+        return version.concat(".0.0");
+    }
+    // handle beta and rc
+    // e.g. 1.10beta1 -? 1.10.0-beta1, 1.10rc1 -> 1.10.0-rc1
+    if (preStrings.some((el) => versionPart[1].includes(el))) {
+        versionPart[1] = versionPart[1]
+            .replace("beta", ".0-beta")
+            .replace("rc", ".0-rc")
+            .replace("preview", ".0-preview");
+        return versionPart.join(".");
+    }
+    if (versionPart[2] == null) {
+        // append patch version if not available
+        // e.g. 2.1 -> 2.1.0
+        return version.concat(".0");
+    }
+    // handle beta and rc
+    // e.g. 1.8.5beta1 -> 1.8.5-beta1, 1.8.5rc1 -> 1.8.5-rc1
+    if (preStrings.some((el) => versionPart[2].includes(el))) {
+        versionPart[2] = versionPart[2]
+            .replace("beta", "-beta")
+            .replace("rc", "-rc")
+            .replace("preview", "-preview");
+        return versionPart.join(".");
+    }
+    return version;
+}
+// Compute an actual version starting from the `version` configuration param.
+function computeVersion(version, repoToken, maxRetries) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // return if passed version is a valid semver
+        if (semver.valid(version)) {
+            core.debug("valid semver provided, skipping computing actual version");
+            return `v${version}`; // Task releases are v-prefixed
+        }
+        let versionPrefix = version;
+        // strip leading `v` char (will be re-added later)
+        if (versionPrefix.startsWith("v")) {
+            versionPrefix = versionPrefix.slice(1, versionPrefix.length);
+        }
+        // strip trailing .x chars
+        if (versionPrefix.endsWith(".x")) {
+            versionPrefix = versionPrefix.slice(0, versionPrefix.length - 2);
+        }
+        const allVersions = yield fetchVersions(repoToken, maxRetries);
+        const possibleVersions = allVersions.filter((v) => v.startsWith(versionPrefix));
+        const versionMap = new Map();
+        possibleVersions.forEach((v) => versionMap.set(normalizeVersion(v), v));
+        const versions = Array.from(versionMap.keys())
+            .sort(semver.rcompare)
+            .map((v) => versionMap.get(v));
+        core.debug(`evaluating ${versions.length} versions`);
+        if (versions.length === 0) {
+            throw new Error("unable to get latest version");
+        }
+        core.debug(`matched: ${versions[0]}`);
+        return `v${versions[0]}`;
+    });
+}
+function getFileName() {
+    var _a;
+    const platform = osPlat === "win32" ? "windows" : osPlat;
+    const arches = {
+        arm: "arm",
+        arm64: "arm64",
+        x64: "amd64",
+        ia32: "386",
+    };
+    const arch = (_a = arches[osArch]) !== null && _a !== void 0 ? _a : osArch;
+    const ext = osPlat === "win32" ? "zip" : "tar.gz";
+    const filename = util.format("task_%s_%s.%s", platform, arch, ext);
+    return filename;
+}
+function downloadRelease(version) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Download
+        const fileName = getFileName();
+        const downloadUrl = util.format("https://github.com/go-task/task/releases/download/%s/%s", version, fileName);
+        let downloadPath = null;
+        try {
+            downloadPath = yield tc.downloadTool(downloadUrl);
+        }
+        catch (error) {
+            if (typeof error === "string" || error instanceof Error) {
+                core.debug(error.toString());
+            }
+            throw new Error(`Failed to download version ${version}: ${error}`);
+        }
+        // Extract
+        let extPath = null;
+        if (osPlat === "win32") {
+            extPath = yield tc.extractZip(downloadPath);
+            // Create a bin/ folder and move `task` there
+            yield io.mkdirP(path.join(extPath, "bin"));
+            yield io.mv(path.join(extPath, "task.exe"), path.join(extPath, "bin"));
+        }
+        else {
+            extPath = yield tc.extractTar(downloadPath);
+            // Create a bin/ folder and move `task` there
+            yield io.mkdirP(path.join(extPath, "bin"));
+            yield io.mv(path.join(extPath, "task"), path.join(extPath, "bin"));
+        }
+        // Install into the local tool cache - node extracts with a root folder that matches the fileName downloaded
+        return tc.cacheDir(extPath, "task", version);
+    });
+}
+function getTask(version_1, repoToken_1) {
+    return __awaiter(this, arguments, void 0, function* (version, repoToken, maxRetries = 3) {
+        // resolve the version number
+        const targetVersion = yield computeVersion(version, repoToken, maxRetries);
+        // look if the binary is cached
+        let toolPath;
+        toolPath = tc.find("task", targetVersion);
+        // if not: download, extract and cache
+        if (!toolPath) {
+            toolPath = yield downloadRelease(targetVersion);
+            core.debug(`Task cached under ${toolPath}`);
+        }
+        toolPath = path.join(toolPath, "bin");
+        core.addPath(toolPath);
+        core.info(`Successfully setup Task version ${targetVersion}`);
+    });
+}
+
+
+/***/ }),
+
+/***/ 5915:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+// Copyright (c) 2019 ARDUINO SA
+//
+// The software is released under the GNU General Public License, which covers the main body
+// of the arduino/setup-task code. The terms of this license can be found at:
+// https://www.gnu.org/licenses/gpl-3.0.en.html
+//
+// You can be released from the requirements of the above licenses by purchasing
+// a commercial license. Buying such a license is mandatory if you want to modify or
+// otherwise use the software for commercial activities involving the Arduino
+// software without disclosing the source code of your own applications. To purchase
+// a commercial license, send an email to license@arduino.cc
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__nccwpck_require__(7484));
+const installer = __importStar(__nccwpck_require__(8328));
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const version = core.getInput("version", { required: true });
+            const repoToken = core.getInput("repo-token");
+            const maxRetries = parseInt(core.getInput("max-retries") || "3", 10);
+            yield installer.getTask(version, repoToken, maxRetries);
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                core.setFailed(error.message);
+            }
+            else {
+                throw error;
+            }
+        }
+    });
+}
+run();
+
+
+/***/ }),
+
 /***/ 4914:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -12361,315 +12670,6 @@ function obtainContentCharset(response) {
 
 /***/ }),
 
-/***/ 7651:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-// Copyright (c) 2019 ARDUINO SA
-//
-// The software is released under the GNU General Public License, which covers the main body
-// of the arduino/setup-task code. The terms of this license can be found at:
-// https://www.gnu.org/licenses/gpl-3.0.en.html
-//
-// You can be released from the requirements of the above licenses by purchasing
-// a commercial license. Buying such a license is mandatory if you want to modify or
-// otherwise use the software for commercial activities involving the Arduino
-// software without disclosing the source code of your own applications. To purchase
-// a commercial license, send an email to license@arduino.cc
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getTask = getTask;
-const os = __importStar(__nccwpck_require__(857));
-const path = __importStar(__nccwpck_require__(6928));
-const util = __importStar(__nccwpck_require__(9023));
-const restm = __importStar(__nccwpck_require__(3338));
-const semver = __importStar(__nccwpck_require__(2088));
-const core = __importStar(__nccwpck_require__(7484));
-const tc = __importStar(__nccwpck_require__(3472));
-const io = __nccwpck_require__(4994);
-const osPlat = os.platform();
-const osArch = os.arch();
-// Retrieve a list of versions scraping tags from the Github API
-function fetchVersions(repoToken, maxRetries) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let rest;
-        if (repoToken !== "") {
-            rest = new restm.RestClient("setup-task", "", [], {
-                headers: { Authorization: `Bearer ${repoToken}` },
-                allowRetries: true,
-                maxRetries,
-            });
-        }
-        else {
-            rest = new restm.RestClient("setup-task", "", [], {
-                allowRetries: true,
-                maxRetries,
-            });
-        }
-        const tags = (yield rest.get("https://api.github.com/repos/go-task/task/releases?per_page=100")).result || [];
-        return tags.map((tag) => tag.tag_name.replace(/^v/, ""));
-    });
-}
-// Make partial versions semver compliant.
-function normalizeVersion(version) {
-    const preStrings = ["beta", "rc", "preview"];
-    const versionPart = version.split(".");
-    if (versionPart[1] == null) {
-        // append minor and patch version if not available
-        // e.g. 2 -> 2.0.0
-        return version.concat(".0.0");
-    }
-    // handle beta and rc
-    // e.g. 1.10beta1 -? 1.10.0-beta1, 1.10rc1 -> 1.10.0-rc1
-    if (preStrings.some((el) => versionPart[1].includes(el))) {
-        versionPart[1] = versionPart[1]
-            .replace("beta", ".0-beta")
-            .replace("rc", ".0-rc")
-            .replace("preview", ".0-preview");
-        return versionPart.join(".");
-    }
-    if (versionPart[2] == null) {
-        // append patch version if not available
-        // e.g. 2.1 -> 2.1.0
-        return version.concat(".0");
-    }
-    // handle beta and rc
-    // e.g. 1.8.5beta1 -> 1.8.5-beta1, 1.8.5rc1 -> 1.8.5-rc1
-    if (preStrings.some((el) => versionPart[2].includes(el))) {
-        versionPart[2] = versionPart[2]
-            .replace("beta", "-beta")
-            .replace("rc", "-rc")
-            .replace("preview", "-preview");
-        return versionPart.join(".");
-    }
-    return version;
-}
-// Compute an actual version starting from the `version` configuration param.
-function computeVersion(version, repoToken, maxRetries) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // return if passed version is a valid semver
-        if (semver.valid(version)) {
-            core.debug("valid semver provided, skipping computing actual version");
-            return `v${version}`; // Task releases are v-prefixed
-        }
-        let versionPrefix = version;
-        // strip leading `v` char (will be re-added later)
-        if (versionPrefix.startsWith("v")) {
-            versionPrefix = versionPrefix.slice(1, versionPrefix.length);
-        }
-        // strip trailing .x chars
-        if (versionPrefix.endsWith(".x")) {
-            versionPrefix = versionPrefix.slice(0, versionPrefix.length - 2);
-        }
-        const allVersions = yield fetchVersions(repoToken, maxRetries);
-        const possibleVersions = allVersions.filter((v) => v.startsWith(versionPrefix));
-        const versionMap = new Map();
-        possibleVersions.forEach((v) => versionMap.set(normalizeVersion(v), v));
-        const versions = Array.from(versionMap.keys())
-            .sort(semver.rcompare)
-            .map((v) => versionMap.get(v));
-        core.debug(`evaluating ${versions.length} versions`);
-        if (versions.length === 0) {
-            throw new Error("unable to get latest version");
-        }
-        core.debug(`matched: ${versions[0]}`);
-        return `v${versions[0]}`;
-    });
-}
-function getFileName() {
-    var _a;
-    const platform = osPlat === "win32" ? "windows" : osPlat;
-    const arches = {
-        arm: "arm",
-        arm64: "arm64",
-        x64: "amd64",
-        ia32: "386",
-    };
-    const arch = (_a = arches[osArch]) !== null && _a !== void 0 ? _a : osArch;
-    const ext = osPlat === "win32" ? "zip" : "tar.gz";
-    const filename = util.format("task_%s_%s.%s", platform, arch, ext);
-    return filename;
-}
-function downloadRelease(version) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // Download
-        const fileName = getFileName();
-        const downloadUrl = util.format("https://github.com/go-task/task/releases/download/%s/%s", version, fileName);
-        let downloadPath = null;
-        try {
-            downloadPath = yield tc.downloadTool(downloadUrl);
-        }
-        catch (error) {
-            if (typeof error === "string" || error instanceof Error) {
-                core.debug(error.toString());
-            }
-            throw new Error(`Failed to download version ${version}: ${error}`);
-        }
-        // Extract
-        let extPath = null;
-        if (osPlat === "win32") {
-            extPath = yield tc.extractZip(downloadPath);
-            // Create a bin/ folder and move `task` there
-            yield io.mkdirP(path.join(extPath, "bin"));
-            yield io.mv(path.join(extPath, "task.exe"), path.join(extPath, "bin"));
-        }
-        else {
-            extPath = yield tc.extractTar(downloadPath);
-            // Create a bin/ folder and move `task` there
-            yield io.mkdirP(path.join(extPath, "bin"));
-            yield io.mv(path.join(extPath, "task"), path.join(extPath, "bin"));
-        }
-        // Install into the local tool cache - node extracts with a root folder that matches the fileName downloaded
-        return tc.cacheDir(extPath, "task", version);
-    });
-}
-function getTask(version_1, repoToken_1) {
-    return __awaiter(this, arguments, void 0, function* (version, repoToken, maxRetries = 3) {
-        // resolve the version number
-        const targetVersion = yield computeVersion(version, repoToken, maxRetries);
-        // look if the binary is cached
-        let toolPath;
-        toolPath = tc.find("task", targetVersion);
-        // if not: download, extract and cache
-        if (!toolPath) {
-            toolPath = yield downloadRelease(targetVersion);
-            core.debug(`Task cached under ${toolPath}`);
-        }
-        toolPath = path.join(toolPath, "bin");
-        core.addPath(toolPath);
-        core.info(`Successfully setup Task version ${targetVersion}`);
-    });
-}
-
-
-/***/ }),
-
-/***/ 1730:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-// Copyright (c) 2019 ARDUINO SA
-//
-// The software is released under the GNU General Public License, which covers the main body
-// of the arduino/setup-task code. The terms of this license can be found at:
-// https://www.gnu.org/licenses/gpl-3.0.en.html
-//
-// You can be released from the requirements of the above licenses by purchasing
-// a commercial license. Buying such a license is mandatory if you want to modify or
-// otherwise use the software for commercial activities involving the Arduino
-// software without disclosing the source code of your own applications. To purchase
-// a commercial license, send an email to license@arduino.cc
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(7484));
-const installer = __importStar(__nccwpck_require__(7651));
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const version = core.getInput("version", { required: true });
-            const repoToken = core.getInput("repo-token");
-            const maxRetries = parseInt(core.getInput("max-retries") || "3", 10);
-            yield installer.getTask(version, repoToken, maxRetries);
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                core.setFailed(error.message);
-            }
-            else {
-                throw error;
-            }
-        }
-    });
-}
-run();
-
-
-/***/ }),
-
 /***/ 2613:
 /***/ ((module) => {
 
@@ -12848,7 +12848,7 @@ module.exports = require("zlib");
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(1730);
+/******/ 	var __webpack_exports__ = __nccwpck_require__(5915);
 /******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()
