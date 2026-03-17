@@ -29,14 +29,22 @@ interface ITaskRelease {
 }
 
 // Retrieve a list of versions scraping tags from the Github API
-async function fetchVersions(repoToken: string): Promise<string[]> {
+async function fetchVersions(
+  repoToken: string,
+  maxRetries: number,
+): Promise<string[]> {
   let rest: restm.RestClient;
   if (repoToken !== "") {
     rest = new restm.RestClient("setup-task", "", [], {
       headers: { Authorization: `Bearer ${repoToken}` },
+      allowRetries: true,
+      maxRetries,
     });
   } else {
-    rest = new restm.RestClient("setup-task");
+    rest = new restm.RestClient("setup-task", "", [], {
+      allowRetries: true,
+      maxRetries,
+    });
   }
 
   const tags: ITaskRelease[] =
@@ -91,6 +99,7 @@ function normalizeVersion(version: string): string {
 async function computeVersion(
   version: string,
   repoToken: string,
+  maxRetries: number,
 ): Promise<string> {
   // return if passed version is a valid semver
   if (semver.valid(version)) {
@@ -109,7 +118,7 @@ async function computeVersion(
     versionPrefix = versionPrefix.slice(0, versionPrefix.length - 2);
   }
 
-  const allVersions = await fetchVersions(repoToken);
+  const allVersions = await fetchVersions(repoToken, maxRetries);
   const possibleVersions = allVersions.filter((v) =>
     v.startsWith(versionPrefix),
   );
@@ -183,9 +192,13 @@ async function downloadRelease(version: string): Promise<string> {
   return tc.cacheDir(extPath, "task", version);
 }
 
-export async function getTask(version: string, repoToken: string) {
+export async function getTask(
+  version: string,
+  repoToken: string,
+  maxRetries: number = 3,
+) {
   // resolve the version number
-  const targetVersion = await computeVersion(version, repoToken);
+  const targetVersion = await computeVersion(version, repoToken, maxRetries);
 
   // look if the binary is cached
   let toolPath: string;

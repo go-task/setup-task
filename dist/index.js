@@ -72,16 +72,21 @@ const io = __nccwpck_require__(4994);
 const osPlat = os.platform();
 const osArch = os.arch();
 // Retrieve a list of versions scraping tags from the Github API
-function fetchVersions(repoToken) {
+function fetchVersions(repoToken, maxRetries) {
     return __awaiter(this, void 0, void 0, function* () {
         let rest;
         if (repoToken !== "") {
             rest = new restm.RestClient("setup-task", "", [], {
                 headers: { Authorization: `Bearer ${repoToken}` },
+                allowRetries: true,
+                maxRetries,
             });
         }
         else {
-            rest = new restm.RestClient("setup-task");
+            rest = new restm.RestClient("setup-task", "", [], {
+                allowRetries: true,
+                maxRetries,
+            });
         }
         const tags = (yield rest.get("https://api.github.com/repos/go-task/task/releases?per_page=100")).result || [];
         return tags.map((tag) => tag.tag_name.replace(/^v/, ""));
@@ -122,7 +127,7 @@ function normalizeVersion(version) {
     return version;
 }
 // Compute an actual version starting from the `version` configuration param.
-function computeVersion(version, repoToken) {
+function computeVersion(version, repoToken, maxRetries) {
     return __awaiter(this, void 0, void 0, function* () {
         // return if passed version is a valid semver
         if (semver.valid(version)) {
@@ -138,7 +143,7 @@ function computeVersion(version, repoToken) {
         if (versionPrefix.endsWith(".x")) {
             versionPrefix = versionPrefix.slice(0, versionPrefix.length - 2);
         }
-        const allVersions = yield fetchVersions(repoToken);
+        const allVersions = yield fetchVersions(repoToken, maxRetries);
         const possibleVersions = allVersions.filter((v) => v.startsWith(versionPrefix));
         const versionMap = new Map();
         possibleVersions.forEach((v) => versionMap.set(normalizeVersion(v), v));
@@ -200,10 +205,10 @@ function downloadRelease(version) {
         return tc.cacheDir(extPath, "task", version);
     });
 }
-function getTask(version, repoToken) {
-    return __awaiter(this, void 0, void 0, function* () {
+function getTask(version_1, repoToken_1) {
+    return __awaiter(this, arguments, void 0, function* (version, repoToken, maxRetries = 3) {
         // resolve the version number
-        const targetVersion = yield computeVersion(version, repoToken);
+        const targetVersion = yield computeVersion(version, repoToken, maxRetries);
         // look if the binary is cached
         let toolPath;
         toolPath = tc.find("task", targetVersion);
@@ -287,7 +292,8 @@ function run() {
         try {
             const version = core.getInput("version", { required: true });
             const repoToken = core.getInput("repo-token");
-            yield installer.getTask(version, repoToken);
+            const maxRetries = parseInt(core.getInput("max-retries") || "3", 10);
+            yield installer.getTask(version, repoToken, maxRetries);
         }
         catch (error) {
             if (error instanceof Error) {
