@@ -78,11 +78,11 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           version: 5.x
-
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
+          cache: "npm"
 
       - name: Install Task
         uses: go-task/setup-task@v1
@@ -135,11 +135,11 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           version: 5.x
-
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
+          cache: "npm"
 
       - name: Install Task
         uses: go-task/setup-task@v1

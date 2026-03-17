@@ -85,3 +85,10 @@ allowed:
   - eupl-1.2
   - liliq-r-1.1
   - liliq-rplus-1.1
+
+reviewed:
+  npm:
+    # These packages are MIT licensed but licensed tool detects as "other"
+    - "@actions/core"
+    - "@actions/http-client"
+    - typed-rest-client

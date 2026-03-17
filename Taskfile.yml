@@ -23,9 +23,6 @@ tasks:
       - task: ts:validate
         vars:
           TSCONFIG_PATH: "./tsconfig.json"
-      - task: ts:validate
-        vars:
-          TSCONFIG_PATH: "./tsconfig.eslint.json"
 
   fix:
     desc: Make automated corrections to the project's files
@@ -45,7 +42,7 @@ tasks:
       - task: npm:install-deps
     cmds:
       - wget --quiet --output-document="{{.ACTION_METADATA_SCHEMA_PATH}}" https://json.schemastore.org/github-action
-      - npx ajv-cli validate --strict=false -s "{{.ACTION_METADATA_SCHEMA_PATH}}" -d "action.yml"
+      - npx ajv validate --strict=false -s "{{.ACTION_METADATA_SCHEMA_PATH}}" -d "action.yml"
 
   docs:generate:
     desc: Create all generated documentation content
@@ -117,7 +114,7 @@ tasks:
     cmds:
       - |
         if [[ "{{.OS}}" == "Windows_NT" ]]; then
-          # npx --call uses the native shell, which makes it too difficult to use npx for this application on Windows,
+          # npx uses the native shell, which makes it too difficult to use it for this application on Windows,
           # so the Windows user is required to have markdown-link-check installed and in PATH.
           if ! which markdown-link-check &>/dev/null; then
             echo "markdown-link-check not found or not in PATH. Please install: https://github.com/tcort/markdown-link-check#readme"
@@ -140,18 +137,16 @@ tasks:
           done
           exit $STATUS
         else
-          npx --package=markdown-link-check --call='
-            STATUS=0
-            for file in \
-              $(find . -type d -name node_modules -prune -o -regex ".*[.]md" -print); do
-              markdown-link-check \
-                --quiet \
-                --config "./.markdown-link-check.json" \
-                "$file"
-              STATUS=$(( $STATUS + $? ))
-            done
-            exit $STATUS
-          '
+          STATUS=0
+          for file in \
+            $(find . -type d -name node_modules -prune -o -regex ".*[.]md" -print); do
+            npx markdown-link-check \
+              --quiet \
+              --config "./.markdown-link-check.json" \
+              "$file"
+            STATUS=$(( $STATUS + $? ))
+          done
+          exit $STATUS
         fi
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-markdown-task/Taskfile.yml
@@ -160,7 +155,7 @@ tasks:
     deps:
       - task: npm:install-deps
     cmds:
-      - npx markdownlint-cli --fix "**/*.md"
+      - npx markdownlint --fix "**/*.md"
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-markdown-task/Taskfile.yml
   markdown:lint:
@@ -168,13 +163,13 @@ tasks:
     deps:
       - task: npm:install-deps
     cmds:
-      - npx markdownlint-cli "**/*.md"
+      - npx markdownlint "**/*.md"
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/npm-task/Taskfile.yml
   npm:install-deps:
     desc: Install dependencies managed by npm
     cmds:
-      - npm install
+      - npm ci
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-npm-task/Taskfile.yml
   npm:validate:
@@ -272,21 +267,21 @@ tasks:
     deps:
       - task: npm:install-deps
     cmds:
-      - npx eslint --ext .js,.jsx,.ts,.tsx --fix .
+      - npx oxlint src/ __tests__/ --fix
 
   ts:lint:
     desc: Lint TypeScript code
     deps:
       - task: npm:install-deps
     cmds:
-      - npx eslint --ext .js,.jsx,.ts,.tsx .
+      - npx oxlint src/ __tests__/
 
   ts:test:
     desc: Test the action's TypeScript code.
     deps:
       - task: npm:install-deps
     cmds:
-      - npx jest
+      - npx vitest run
 
   ts:validate:
     desc: Validate TypeScript configuration file against its JSON schema
@@ -306,7 +301,7 @@ tasks:
       - |
         # TypeScript allows comments in tsconfig.json.
         # ajv-cli did not support comments in JSON at the 3.x version in use (support was added in a later version).
-        npx strip-json-comments-cli \
+        npx strip-json-comments \
           --no-whitespace \
           "{{.INSTANCE_PATH}}" \
           > "{{.WORKING_INSTANCE_PATH}}"

@@ -23,7 +23,7 @@ const IS_WINDOWS = process.platform === "win32";
 
 process.env.RUNNER_TEMP = tempDir;
 process.env.RUNNER_TOOL_CACHE = toolDir;
-import * as installer from "../src/installer"; // eslint-disable-line import/first
+import * as installer from "../src/installer";
 
 describe("installer tests", () => {
   beforeEach(async () => {

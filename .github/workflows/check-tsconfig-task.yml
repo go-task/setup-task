@@ -28,22 +28,14 @@ jobs:
   validate:
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-
-      matrix:
-        file:
-          - ./tsconfig.json
-          - ./tsconfig.eslint.json
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
+          cache: "npm"
 
       - name: Install Task
         uses: go-task/setup-task@v1
@@ -51,7 +43,5 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           version: 3.x
 
-      - name: Validate ${{ matrix.file }}
-        env:
-          TSCONFIG_PATH: ${{ matrix.file }}
+      - name: Validate tsconfig.json
         run: task --silent ts:validate

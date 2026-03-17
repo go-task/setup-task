@@ -33,11 +33,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
+          cache: "npm"
 
       - name: Install Task
         uses: go-task/setup-task@v1
@@ -54,11 +54,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: package.json
+          cache: "npm"
 
       - name: Install Task
         uses: go-task/setup-task@v1
