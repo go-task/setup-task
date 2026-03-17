@@ -16,7 +16,7 @@ https://taskfile.dev/#/installation
 Follow the installation instructions here:<br />
 https://nodejs.dev/en/download
 
-Node.js 20.x is used for development of this project. [nvm](https://github.com/nvm-sh/nvm) is recommended to easily switch between Node.js versions.
+Node.js 24.x is used for development of this project. [nvm](https://github.com/nvm-sh/nvm) is recommended to easily switch between Node.js versions.
 
 #### Extras
 
@@ -31,15 +31,7 @@ Now you're ready to work some [TypeScript](https://www.typescriptlang.org/) magi
 
 Make sure to write or update tests for your work when appropriate.
 
-### 3. Format code
-
-Format the code to follow the standard style for the project:
-
-```
-npm run format
-```
-
-### 4. Run tests
+### 3. Run tests
 
 Run the tests to ensure that the code works as expected:
 
@@ -47,7 +39,7 @@ Run the tests to ensure that the code works as expected:
 task check
 ```
 
-### 5. Build
+### 4. Build
 
 It is necessary to compile the code before it can be used by GitHub Actions. Remember to run this command before committing any code changes:
 
@@ -55,7 +47,7 @@ It is necessary to compile the code before it can be used by GitHub Actions. Rem
 task build
 ```
 
-### 6. Commit
+### 5. Commit
 
 Everything is now ready to make your contribution to the project, so commit it to the repository and submit a pull request.
 
