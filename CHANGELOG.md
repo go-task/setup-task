@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Upgraded to Node 24
+  ([#10](https://github.com/go-task/setup-task/pull/10) by @vmaerten).
+
+## v1.1.0 - 2026-03-17
+
+- Added configurable HTTP retry for API requests
+  ([#7](https://github.com/go-task/setup-task/pull/7) by @vmaerten).
+
 ## v1.0.0 - 2025-09-12
 
 - Forked [arduino/setup-task](https://github.com/arduino/setup-task) (by @pd93).
