@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Upgraded to Node 24
+- **BREAKING**: Upgraded to Node 24. Requires a GitHub Actions runner with
+  Node.js 24 support
   ([#10](https://github.com/go-task/setup-task/pull/10) by @vmaerten).
 
 ## v1.1.0 - 2026-03-17
