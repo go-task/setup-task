@@ -150,12 +150,7 @@ function getFileName() {
   };
   const taskArch: string = arches[osArch] ?? osArch;
   const ext: string = osPlat === "win32" ? "zip" : "tar.gz";
-  const filename: string = format(
-    "task_%s_%s.%s",
-    taskPlatform,
-    taskArch,
-    ext,
-  );
+  const filename: string = format("task_%s_%s.%s", taskPlatform, taskArch, ext);
 
   return filename;
 }

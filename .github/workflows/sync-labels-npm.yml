@@ -35,7 +35,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
@@ -128,7 +127,6 @@ jobs:
         uses: geekyeggo/delete-artifact@v5
         with:
           name: ${{ env.CONFIGURATIONS_ARTIFACT_PREFIX }}*
-
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
