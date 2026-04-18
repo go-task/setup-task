@@ -18,8 +18,7 @@ import * as semver from "semver";
 
 import * as core from "@actions/core";
 import * as tc from "@actions/tool-cache";
-
-import io = require("@actions/io");
+import * as io from "@actions/io";
 
 const osPlat: string = os.platform();
 const osArch: string = os.arch();

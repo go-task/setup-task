@@ -11,6 +11,11 @@
   to eliminate the Node 24 `DEP0169` deprecation warning about `url.parse()`.
 - Modernized the TypeScript tooling stack (vitest, oxlint, `@actions/core@2`,
   `@actions/io@2`, updated `@types/node`, `@vercel/ncc`, `prettier`, etc.).
+- Migrated the project to ESM (sources + bundle). Aligns with the new
+  `@actions/*` ESM-only majors and produces a ~47% smaller `dist/index.js`.
+- Upgraded `@actions/core` 2 → 3, `@actions/http-client` 2 → 4,
+  `@actions/io` 2 → 3, `@actions/tool-cache` 2 → 4, `typescript` 5 → 6, and
+  `markdownlint-cli` 0.47 → 0.48.
 
 ## v1.1.0 - 2026-03-17
 
