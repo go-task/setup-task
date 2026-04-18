@@ -7,6 +7,10 @@
 - **BREAKING**: Upgraded to Node 24. Requires a GitHub Actions runner with
   Node.js 24 support
   ([#10](https://github.com/go-task/setup-task/pull/10) by @vmaerten).
+- Replaced `typed-rest-client` with `@actions/http-client` for GitHub API calls
+  to eliminate the Node 24 `DEP0169` deprecation warning about `url.parse()`.
+- Modernized the TypeScript tooling stack (vitest, oxlint, `@actions/core@2`,
+  `@actions/io@2`, updated `@types/node`, `@vercel/ncc`, `prettier`, etc.).
 
 ## v1.1.0 - 2026-03-17
 

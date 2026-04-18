@@ -13,7 +13,7 @@
 import * as os from "os";
 import * as path from "path";
 import * as util from "util";
-import * as restm from "typed-rest-client/RestClient";
+import { HttpClient } from "@actions/http-client";
 import * as semver from "semver";
 
 import * as core from "@actions/core";
@@ -33,24 +33,19 @@ async function fetchVersions(
   repoToken: string,
   maxRetries: number,
 ): Promise<string[]> {
-  let rest: restm.RestClient;
-  if (repoToken !== "") {
-    rest = new restm.RestClient("setup-task", "", [], {
-      headers: { Authorization: `Bearer ${repoToken}` },
-      allowRetries: true,
-      maxRetries,
-    });
-  } else {
-    rest = new restm.RestClient("setup-task", "", [], {
-      allowRetries: true,
-      maxRetries,
-    });
-  }
+  const http = new HttpClient("setup-task", [], {
+    allowRetries: true,
+    maxRetries,
+  });
+  const headers = repoToken
+    ? { Authorization: `Bearer ${repoToken}` }
+    : undefined;
 
   const tags: ITaskRelease[] =
     (
-      await rest.get<ITaskRelease[]>(
+      await http.getJson<ITaskRelease[]>(
         "https://api.github.com/repos/go-task/task/releases?per_page=100",
+        headers,
       )
     ).result || [];
 
