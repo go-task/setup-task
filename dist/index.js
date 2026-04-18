@@ -34485,9 +34485,7 @@ async function fetchVersions(repoToken, maxRetries) {
         allowRetries: true,
         maxRetries,
     });
-    const headers = repoToken
-        ? { Authorization: `Bearer ${repoToken}` }
-        : undefined;
+    const headers = repoToken ? { Authorization: `Bearer ${repoToken}` } : undefined;
     const tags = (await http.getJson("https://api.github.com/repos/go-task/task/releases?per_page=100", headers)).result || [];
     return tags.map((tag) => tag.tag_name.replace(/^v/, ""));
 }
