@@ -2,8 +2,6 @@ name: CI
 
 on:
   push:
-    branches: [main]
-  pull_request:
   schedule:
     # Catch breakage from external changes (schema stores, dictionary updates, transitive bumps).
     - cron: "0 8 * * TUE"
