@@ -17,17 +17,7 @@
   </p>
 </div>
 
-[![Test TypeScript status](https://github.com/go-task/setup-task/actions/workflows/test-typescript-task.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/test-typescript-task.yml)
-[![Check TypeScript status](https://github.com/go-task/setup-task/actions/workflows/check-typescript-task.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/check-typescript-task.yml)
-[![Check TypeScript Configuration status](https://github.com/go-task/setup-task/actions/workflows/check-tsconfig-task.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/check-tsconfig-task.yml)
-[![Check npm status](https://github.com/go-task/setup-task/actions/workflows/check-npm-task.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/check-npm-task.yml)
-[![Integration Tests status](https://github.com/go-task/setup-task/actions/workflows/test-integration.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/test-integration.yml)
-[![Check Action Metadata status](https://github.com/go-task/setup-task/actions/workflows/check-action-metadata-task.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/check-action-metadata-task.yml)
-[![Check Prettier Formatting status](https://github.com/go-task/setup-task/actions/workflows/check-prettier-formatting-task.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/check-prettier-formatting-task.yml)
-[![Check Markdown status](https://github.com/go-task/setup-task/actions/workflows/check-markdown-task.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/check-markdown-task.yml)
-[![Spell Check status](https://github.com/go-task/setup-task/actions/workflows/spell-check-task.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/spell-check-task.yml)
-[![Check License status](https://github.com/go-task/setup-task/actions/workflows/check-license.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/check-license.yml)
-[![Check npm Dependencies status](https://github.com/go-task/setup-task/actions/workflows/check-npm-dependencies-task.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/check-npm-dependencies-task.yml)
+[![CI status](https://github.com/go-task/setup-task/actions/workflows/ci.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/ci.yml)
 [![Sync Labels status](https://github.com/go-task/setup-task/actions/workflows/sync-labels-npm.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/sync-labels-npm.yml)
 
 ## Inputs
