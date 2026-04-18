@@ -10,19 +10,19 @@
 // software without disclosing the source code of your own applications. To purchase
 // a commercial license, send an email to license@arduino.cc
 
-import * as core from "@actions/core";
-import * as installer from "./installer.js";
+import { getInput, setFailed } from "@actions/core";
+import { getTask } from "./installer.js";
 
 async function run() {
   try {
-    const version = core.getInput("version", { required: true });
-    const repoToken = core.getInput("repo-token");
-    const maxRetries = parseInt(core.getInput("max-retries") || "3", 10);
+    const version = getInput("version", { required: true });
+    const repoToken = getInput("repo-token");
+    const maxRetries = parseInt(getInput("max-retries") || "3", 10);
 
-    await installer.getTask(version, repoToken, maxRetries);
+    await getTask(version, repoToken, maxRetries);
   } catch (error) {
     if (error instanceof Error) {
-      core.setFailed(error.message);
+      setFailed(error.message);
     } else {
       throw error;
     }

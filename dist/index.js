@@ -33651,8 +33651,12 @@ function getIDToken(aud) {
  */
 
 //# sourceMappingURL=core.js.map
-// EXTERNAL MODULE: external "util"
-var external_util_ = __nccwpck_require__(9023);
+;// CONCATENATED MODULE: external "node:os"
+const external_node_os_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:os");
+;// CONCATENATED MODULE: external "node:path"
+const external_node_path_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path");
+// EXTERNAL MODULE: external "node:util"
+var external_node_util_ = __nccwpck_require__(7975);
 // EXTERNAL MODULE: ./node_modules/semver/index.js
 var node_modules_semver = __nccwpck_require__(2088);
 ;// CONCATENATED MODULE: ./node_modules/@actions/tool-cache/lib/manifest.js
@@ -33763,6 +33767,8 @@ function _readLinuxVersionFile() {
 //# sourceMappingURL=manifest.js.map
 ;// CONCATENATED MODULE: external "stream"
 const external_stream_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("stream");
+// EXTERNAL MODULE: external "util"
+var external_util_ = __nccwpck_require__(9023);
 ;// CONCATENATED MODULE: ./node_modules/@actions/tool-cache/lib/retry-helper.js
 var retry_helper_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -34471,8 +34477,8 @@ function _unique(values) {
 
 
 
-const osPlat = external_os_namespaceObject.platform();
-const osArch = external_os_namespaceObject.arch();
+const osPlat = (0,external_node_os_namespaceObject.platform)();
+const osArch = (0,external_node_os_namespaceObject.arch)();
 // Retrieve a list of versions scraping tags from the Github API
 async function fetchVersions(repoToken, maxRetries) {
     const http = new lib_HttpClient("setup-task", [], {
@@ -34522,7 +34528,7 @@ function normalizeVersion(version) {
 // Compute an actual version starting from the `version` configuration param.
 async function computeVersion(version, repoToken, maxRetries) {
     // return if passed version is a valid semver
-    if (node_modules_semver.valid(version)) {
+    if ((0,node_modules_semver.valid)(version)) {
         core_debug("valid semver provided, skipping computing actual version");
         return `v${version}`; // Task releases are v-prefixed
     }
@@ -34550,22 +34556,22 @@ async function computeVersion(version, repoToken, maxRetries) {
     return `v${versions[0]}`;
 }
 function getFileName() {
-    const platform = osPlat === "win32" ? "windows" : osPlat;
+    const taskPlatform = osPlat === "win32" ? "windows" : osPlat;
     const arches = {
         arm: "arm",
         arm64: "arm64",
         x64: "amd64",
         ia32: "386",
     };
-    const arch = arches[osArch] ?? osArch;
+    const taskArch = arches[osArch] ?? osArch;
     const ext = osPlat === "win32" ? "zip" : "tar.gz";
-    const filename = external_util_.format("task_%s_%s.%s", platform, arch, ext);
+    const filename = (0,external_node_util_.format)("task_%s_%s.%s", taskPlatform, taskArch, ext);
     return filename;
 }
 async function downloadRelease(version) {
     // Download
     const fileName = getFileName();
-    const downloadUrl = external_util_.format("https://github.com/go-task/task/releases/download/%s/%s", version, fileName);
+    const downloadUrl = (0,external_node_util_.format)("https://github.com/go-task/task/releases/download/%s/%s", version, fileName);
     let downloadPath = null;
     try {
         downloadPath = await downloadTool(downloadUrl);
@@ -34581,14 +34587,14 @@ async function downloadRelease(version) {
     if (osPlat === "win32") {
         extPath = await extractZip(downloadPath);
         // Create a bin/ folder and move `task` there
-        await mkdirP(external_path_namespaceObject.join(extPath, "bin"));
-        await mv(external_path_namespaceObject.join(extPath, "task.exe"), external_path_namespaceObject.join(extPath, "bin"));
+        await mkdirP((0,external_node_path_namespaceObject.join)(extPath, "bin"));
+        await mv((0,external_node_path_namespaceObject.join)(extPath, "task.exe"), (0,external_node_path_namespaceObject.join)(extPath, "bin"));
     }
     else {
         extPath = await extractTar(downloadPath);
         // Create a bin/ folder and move `task` there
-        await mkdirP(external_path_namespaceObject.join(extPath, "bin"));
-        await mv(external_path_namespaceObject.join(extPath, "task"), external_path_namespaceObject.join(extPath, "bin"));
+        await mkdirP((0,external_node_path_namespaceObject.join)(extPath, "bin"));
+        await mv((0,external_node_path_namespaceObject.join)(extPath, "task"), (0,external_node_path_namespaceObject.join)(extPath, "bin"));
     }
     // Install into the local tool cache - node extracts with a root folder that matches the fileName downloaded
     return cacheDir(extPath, "task", version);
@@ -34604,7 +34610,7 @@ async function getTask(version, repoToken, maxRetries = 3) {
         toolPath = await downloadRelease(targetVersion);
         core_debug(`Task cached under ${toolPath}`);
     }
-    toolPath = external_path_namespaceObject.join(toolPath, "bin");
+    toolPath = (0,external_node_path_namespaceObject.join)(toolPath, "bin");
     addPath(toolPath);
     info(`Successfully setup Task version ${targetVersion}`);
 }

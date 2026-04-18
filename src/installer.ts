@@ -10,18 +10,23 @@
 // software without disclosing the source code of your own applications. To purchase
 // a commercial license, send an email to license@arduino.cc
 
-import * as os from "os";
-import * as path from "path";
-import * as util from "util";
+import { arch, platform } from "node:os";
+import { join } from "node:path";
+import { format } from "node:util";
 import { HttpClient } from "@actions/http-client";
-import * as semver from "semver";
+import { rcompare, valid } from "semver";
+import { addPath, debug, info } from "@actions/core";
+import {
+  cacheDir,
+  downloadTool,
+  extractTar,
+  extractZip,
+  find,
+} from "@actions/tool-cache";
+import { mkdirP, mv } from "@actions/io";
 
-import * as core from "@actions/core";
-import * as tc from "@actions/tool-cache";
-import * as io from "@actions/io";
-
-const osPlat: string = os.platform();
-const osArch: string = os.arch();
+const osPlat: string = platform();
+const osArch: string = arch();
 
 interface ITaskRelease {
   tag_name: string;
@@ -96,8 +101,8 @@ async function computeVersion(
   maxRetries: number,
 ): Promise<string> {
   // return if passed version is a valid semver
-  if (semver.valid(version)) {
-    core.debug("valid semver provided, skipping computing actual version");
+  if (valid(version)) {
+    debug("valid semver provided, skipping computing actual version");
     return `v${version}`; // Task releases are v-prefixed
   }
 
@@ -121,31 +126,36 @@ async function computeVersion(
   possibleVersions.forEach((v) => versionMap.set(normalizeVersion(v), v));
 
   const versions = Array.from(versionMap.keys())
-    .sort(semver.rcompare)
+    .sort(rcompare)
     .map((v) => versionMap.get(v));
 
-  core.debug(`evaluating ${versions.length} versions`);
+  debug(`evaluating ${versions.length} versions`);
 
   if (versions.length === 0) {
     throw new Error("unable to get latest version");
   }
 
-  core.debug(`matched: ${versions[0]}`);
+  debug(`matched: ${versions[0]}`);
 
   return `v${versions[0]}`;
 }
 
 function getFileName() {
-  const platform: string = osPlat === "win32" ? "windows" : osPlat;
+  const taskPlatform: string = osPlat === "win32" ? "windows" : osPlat;
   const arches = {
     arm: "arm",
     arm64: "arm64",
     x64: "amd64",
     ia32: "386",
   };
-  const arch: string = arches[osArch] ?? osArch;
+  const taskArch: string = arches[osArch] ?? osArch;
   const ext: string = osPlat === "win32" ? "zip" : "tar.gz";
-  const filename: string = util.format("task_%s_%s.%s", platform, arch, ext);
+  const filename: string = format(
+    "task_%s_%s.%s",
+    taskPlatform,
+    taskArch,
+    ext,
+  );
 
   return filename;
 }
@@ -153,17 +163,17 @@ function getFileName() {
 async function downloadRelease(version: string): Promise<string> {
   // Download
   const fileName: string = getFileName();
-  const downloadUrl: string = util.format(
+  const downloadUrl: string = format(
     "https://github.com/go-task/task/releases/download/%s/%s",
     version,
     fileName,
   );
   let downloadPath: string | null = null;
   try {
-    downloadPath = await tc.downloadTool(downloadUrl);
+    downloadPath = await downloadTool(downloadUrl);
   } catch (error) {
     if (typeof error === "string" || error instanceof Error) {
-      core.debug(error.toString());
+      debug(error.toString());
     }
     throw new Error(`Failed to download version ${version}: ${error}`);
   }
@@ -171,19 +181,19 @@ async function downloadRelease(version: string): Promise<string> {
   // Extract
   let extPath: string | null = null;
   if (osPlat === "win32") {
-    extPath = await tc.extractZip(downloadPath);
+    extPath = await extractZip(downloadPath);
     // Create a bin/ folder and move `task` there
-    await io.mkdirP(path.join(extPath, "bin"));
-    await io.mv(path.join(extPath, "task.exe"), path.join(extPath, "bin"));
+    await mkdirP(join(extPath, "bin"));
+    await mv(join(extPath, "task.exe"), join(extPath, "bin"));
   } else {
-    extPath = await tc.extractTar(downloadPath);
+    extPath = await extractTar(downloadPath);
     // Create a bin/ folder and move `task` there
-    await io.mkdirP(path.join(extPath, "bin"));
-    await io.mv(path.join(extPath, "task"), path.join(extPath, "bin"));
+    await mkdirP(join(extPath, "bin"));
+    await mv(join(extPath, "task"), join(extPath, "bin"));
   }
 
   // Install into the local tool cache - node extracts with a root folder that matches the fileName downloaded
-  return tc.cacheDir(extPath, "task", version);
+  return cacheDir(extPath, "task", version);
 }
 
 export async function getTask(
@@ -196,15 +206,15 @@ export async function getTask(
 
   // look if the binary is cached
   let toolPath: string;
-  toolPath = tc.find("task", targetVersion);
+  toolPath = find("task", targetVersion);
 
   // if not: download, extract and cache
   if (!toolPath) {
     toolPath = await downloadRelease(targetVersion);
-    core.debug(`Task cached under ${toolPath}`);
+    debug(`Task cached under ${toolPath}`);
   }
 
-  toolPath = path.join(toolPath, "bin");
-  core.addPath(toolPath);
-  core.info(`Successfully setup Task version ${targetVersion}`);
+  toolPath = join(toolPath, "bin");
+  addPath(toolPath);
+  info(`Successfully setup Task version ${targetVersion}`);
 }
