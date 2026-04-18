@@ -16,13 +16,7 @@ import { format } from "node:util";
 import { HttpClient } from "@actions/http-client";
 import { rcompare, valid } from "semver";
 import { addPath, debug, info } from "@actions/core";
-import {
-  cacheDir,
-  downloadTool,
-  extractTar,
-  extractZip,
-  find,
-} from "@actions/tool-cache";
+import { cacheDir, downloadTool, extractTar, extractZip, find } from "@actions/tool-cache";
 import { mkdirP, mv } from "@actions/io";
 
 const osPlat: string = platform();
@@ -33,17 +27,12 @@ interface ITaskRelease {
 }
 
 // Retrieve a list of versions scraping tags from the Github API
-async function fetchVersions(
-  repoToken: string,
-  maxRetries: number,
-): Promise<string[]> {
+async function fetchVersions(repoToken: string, maxRetries: number): Promise<string[]> {
   const http = new HttpClient("setup-task", [], {
     allowRetries: true,
     maxRetries,
   });
-  const headers = repoToken
-    ? { Authorization: `Bearer ${repoToken}` }
-    : undefined;
+  const headers = repoToken ? { Authorization: `Bearer ${repoToken}` } : undefined;
 
   const tags: ITaskRelease[] =
     (
@@ -118,9 +107,7 @@ async function computeVersion(
   }
 
   const allVersions = await fetchVersions(repoToken, maxRetries);
-  const possibleVersions = allVersions.filter((v) =>
-    v.startsWith(versionPrefix),
-  );
+  const possibleVersions = allVersions.filter((v) => v.startsWith(versionPrefix));
 
   const versionMap = new Map();
   possibleVersions.forEach((v) => versionMap.set(normalizeVersion(v), v));
@@ -191,11 +178,7 @@ async function downloadRelease(version: string): Promise<string> {
   return cacheDir(extPath, "task", version);
 }
 
-export async function getTask(
-  version: string,
-  repoToken: string,
-  maxRetries: number = 3,
-) {
+export async function getTask(version: string, repoToken: string, maxRetries: number = 3) {
   // resolve the version number
   const targetVersion = await computeVersion(version, repoToken, maxRetries);
 

@@ -28,7 +28,7 @@ tasks:
     desc: Make automated corrections to the project's files
     deps:
       - task: general:correct-spelling
-      - task: general:format-prettier
+      - task: general:format
       - task: markdown:fix
       - task: ts:build
       - task: ts:fix-lint
@@ -91,13 +91,12 @@ tasks:
     cmds:
       - poetry run codespell --write-changes
 
-  # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-prettier-formatting-task/Taskfile.yml
-  general:format-prettier:
-    desc: Format all supported files with Prettier
+  general:format:
+    desc: Format all supported files with oxfmt
     deps:
       - task: npm:install-deps
     cmds:
-      - npx prettier --write .
+      - npx oxfmt --write .
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-npm-dependencies-task/Taskfile.yml
   general:install-deps:

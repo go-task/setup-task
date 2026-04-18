@@ -110,8 +110,8 @@ jobs:
           version: 3.x
       - run: task --silent markdown:${{ matrix.step }}
 
-  check-prettier:
-    name: Prettier formatting
+  check-format:
+    name: oxfmt formatting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -123,8 +123,7 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           version: 3.x
-      - run: task general:format-prettier
-      - run: git diff --color --exit-code
+      - run: npx oxfmt --check .
 
   check-license:
     name: LICENSE detection
