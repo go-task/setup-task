@@ -17,7 +17,7 @@ jobs:
     name: Lint (oxlint)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v5
         with:
           node-version-file: package.json
@@ -32,7 +32,7 @@ jobs:
     name: Validate tsconfig
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v5
         with:
           node-version-file: package.json
@@ -47,7 +47,7 @@ jobs:
     name: Validate action.yml
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v5
         with:
           node-version-file: package.json
@@ -62,7 +62,7 @@ jobs:
     name: Validate package.json
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v5
         with:
           node-version-file: package.json
@@ -77,7 +77,7 @@ jobs:
     name: Lockfile sync
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v5
         with:
           node-version-file: package.json
@@ -97,7 +97,7 @@ jobs:
       matrix:
         step: [lint, check-links]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v5
         with:
           node-version-file: package.json
@@ -114,7 +114,7 @@ jobs:
     name: oxfmt formatting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v5
         with:
           node-version-file: package.json
@@ -132,7 +132,7 @@ jobs:
       EXPECTED_LICENSE_FILENAME: LICENSE
       EXPECTED_LICENSE_TYPE: GPL-3.0
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ruby
@@ -162,7 +162,7 @@ jobs:
     name: Deps license cache freshness
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
       - uses: ruby/setup-ruby@v1
@@ -202,7 +202,7 @@ jobs:
     name: Deps license allowlist
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
       - uses: ruby/setup-ruby@v1
@@ -226,7 +226,7 @@ jobs:
     name: Spell check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: "3.9"
@@ -245,7 +245,7 @@ jobs:
       matrix:
         operating-system: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v5
         with:
           node-version-file: package.json
@@ -260,7 +260,7 @@ jobs:
     name: dist bundle up to date
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v5
         with:
           node-version-file: package.json
@@ -277,7 +277,7 @@ jobs:
     name: Integration - defaults
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Run action with defaults
         uses: ./
       - run: task --version
@@ -290,20 +290,14 @@ jobs:
       matrix:
         runs-on: [ubuntu-latest, windows-latest, macos-latest]
         version:
-          - input: 2.x
-            expected: "Task version: 2.8.1"
           - input: 3.36.x
             expected: "Task version: v3.36.0 (h1:XVJ5hQ5hdzTAulHpAGzbUMUuYr9MUOEQFOFazI3hUsY=)"
           - input: 3.37.2
             expected: "Task version: v3.37.2 (h1:Jwgvo+2vX79Fu+44xPxVKC5DIkUE89QeDjN2tmYaQzA=)"
-        exclude:
-          # Task 2.x has no macOS arm64 build, and macos-latest is Apple Silicon.
-          - runs-on: macos-latest
-            version:
-              input: 2.x
-              expected: "Task version: 2.8.1"
+          - input: 3.50.0
+            expected: "3.50.0"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./
         with:
           version: ${{ matrix.version.input }}
@@ -316,7 +310,7 @@ jobs:
     name: Integration - invalid version rejected
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - id: setup-task
         continue-on-error: true
         uses: ./
