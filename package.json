@@ -16,14 +16,14 @@
   "author": "Arduino",
   "license": "GPL-3.0",
   "dependencies": {
-    "@actions/core": "^2.0.1",
+    "@actions/core": "^2.0.3",
     "@actions/http-client": "^2.2.3",
     "@actions/tool-cache": "^2.0.2",
-    "semver": "^7.7.3"
+    "semver": "^7.7.4"
   },
   "devDependencies": {
     "@actions/io": "^2.0.0",
-    "@types/node": "^25.0.3",
+    "@types/node": "^25.6.0",
     "@types/semver": "^7.7.1",
     "@vercel/ncc": "^0.38.4",
     "ajv-cli": "^5.0.0",
@@ -32,11 +32,11 @@
     "markdown-link-check": "^3.14.2",
     "markdownlint-cli": "^0.47.0",
     "nock": "^13.5.6",
-    "oxlint": "^1.36.0",
-    "prettier": "^3.7.4",
+    "oxlint": "^1.60.0",
+    "prettier": "^3.8.3",
     "strip-json-comments-cli": "^3.0.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.16"
+    "vitest": "^4.1.4"
   },
   "engines": {
     "node": "24.x"
