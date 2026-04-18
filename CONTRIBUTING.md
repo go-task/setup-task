@@ -4,10 +4,10 @@
 
 #### Task
 
-Common development processes are run using [the **Task** task runner tool](https://taskfile.dev/#/).
+Common development processes are run using [the **Task** task runner tool](https://taskfile.dev/).
 
 Follow the installation instructions here:<br />
-https://taskfile.dev/#/installation
+https://taskfile.dev/installation/
 
 #### Node.js
 
