@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v2.0.0 - 2026-03-18
+
 - **BREAKING**: Upgraded to Node 24. Requires a GitHub Actions runner with
   Node.js 24 support
   ([#10](https://github.com/go-task/setup-task/pull/10) by @vmaerten).
