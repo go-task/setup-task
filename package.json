@@ -32,7 +32,7 @@
     "github-label-sync": "3.0.0",
     "markdown-link-check": "^3.14.2",
     "markdownlint-cli": "^0.48.0",
-    "nock": "^13.5.6",
+    "nock": "^14.0.0",
     "oxfmt": "^0.45.0",
     "oxlint": "^1.60.0",
     "strip-json-comments-cli": "^3.0.0",
