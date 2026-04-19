@@ -1,0 +1,321 @@
+name: CI
+
+on:
+  push:
+  schedule:
+    # Catch breakage from external changes (schema stores, dictionary updates, transitive bumps).
+    - cron: "0 8 * * TUE"
+  workflow_dispatch:
+  repository_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-typescript:
+    name: Lint (oxlint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: "npm"
+      - uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
+      - run: task ts:lint
+
+  check-tsconfig:
+    name: Validate tsconfig
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: "npm"
+      - uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
+      - run: task --silent ts:validate
+
+  check-action-metadata:
+    name: Validate action.yml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: "npm"
+      - uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
+      - run: task --silent action:validate
+
+  check-npm-validate:
+    name: Validate package.json
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: "npm"
+      - uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
+      - run: task --silent npm:validate
+
+  check-npm-sync:
+    name: Lockfile sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: "npm"
+      - uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
+      - run: task npm:install-deps
+      - run: git diff --color --exit-code package-lock.json
+
+  check-markdown:
+    name: Markdown ${{ matrix.step }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        step: [lint, check-links]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: "npm"
+      - if: matrix.step == 'lint'
+        uses: xt0rted/markdownlint-problem-matcher@v3
+      - uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
+      - run: task --silent markdown:${{ matrix.step }}
+
+  check-format:
+    name: oxfmt formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: "npm"
+      - uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
+      - run: npx oxfmt --check .
+
+  check-license:
+    name: LICENSE detection
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_LICENSE_FILENAME: LICENSE
+      EXPECTED_LICENSE_TYPE: GPL-3.0
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+      - run: gem install licensee
+      - name: Check license file
+        run: |
+          EXIT_STATUS=0
+          LICENSEE_OUTPUT="$(licensee detect --json --confidence=100)"
+
+          DETECTED_LICENSE_FILE="$(echo "$LICENSEE_OUTPUT" | jq .matched_files[0].filename | tr --delete '\r')"
+          echo "Detected license file: $DETECTED_LICENSE_FILE"
+          if [ "$DETECTED_LICENSE_FILE" != "\"${EXPECTED_LICENSE_FILENAME}\"" ]; then
+            echo "::error file=${DETECTED_LICENSE_FILE}::detected license file $DETECTED_LICENSE_FILE doesn't match expected: $EXPECTED_LICENSE_FILENAME"
+            EXIT_STATUS=1
+          fi
+
+          DETECTED_LICENSE_TYPE="$(echo "$LICENSEE_OUTPUT" | jq .matched_files[0].matched_license | tr --delete '\r')"
+          echo "Detected license type: $DETECTED_LICENSE_TYPE"
+          if [ "$DETECTED_LICENSE_TYPE" != "\"${EXPECTED_LICENSE_TYPE}\"" ]; then
+            echo "::error file=${DETECTED_LICENSE_FILE}::detected license type $DETECTED_LICENSE_TYPE doesn't match expected \"${EXPECTED_LICENSE_TYPE}\""
+            EXIT_STATUS=1
+          fi
+
+          exit $EXIT_STATUS
+
+  check-deps-licenses-cache:
+    name: Deps license cache freshness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+      - uses: licensee/setup-licensed@v1.3.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          version: 5.x
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: "npm"
+      - uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
+      - run: task --silent general:cache-dep-licenses
+      - name: Check for outdated cache
+        id: diff
+        run: |
+          git add .
+          if ! git diff --cached --color --exit-code; then
+            echo
+            echo "::error::Dependency license metadata out of sync."
+            exit 1
+          fi
+      - if: failure() && steps.diff.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          include-hidden-files: true
+          name: dep-licenses-cache
+          path: .licenses/
+
+  check-deps-licenses-approved:
+    name: Deps license allowlist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+      - uses: licensee/setup-licensed@v1.3.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          version: 5.x
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: "npm"
+      - uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
+      - run: task --silent general:check-dep-licenses
+
+  spell-check:
+    name: Spell check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.9"
+      - run: pip install poetry
+      - uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
+      - run: task general:check-spelling
+
+  test-typescript:
+    name: Tests (${{ matrix.operating-system }})
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-system: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: "npm"
+      - uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
+      - run: task ts:test
+
+  check-packaging:
+    name: dist bundle up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: "npm"
+      - uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
+      - run: task ts:build
+      # Ignore CR because ncc output has mixed line endings on Windows checkouts.
+      - run: git diff --ignore-cr-at-eol --color --exit-code dist
+
+  integration-defaults:
+    name: Integration - defaults
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run action with defaults
+        uses: ./
+      - run: task --version
+
+  integration-version:
+    name: Integration - ${{ matrix.version.input }} / ${{ matrix.runs-on }}
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [ubuntu-latest, windows-latest, macos-latest]
+        version:
+          - input: 3.36.x
+            expected: "Task version: v3.36.0 (h1:XVJ5hQ5hdzTAulHpAGzbUMUuYr9MUOEQFOFazI3hUsY=)"
+          - input: 3.37.2
+            expected: "Task version: v3.37.2 (h1:Jwgvo+2vX79Fu+44xPxVKC5DIkUE89QeDjN2tmYaQzA=)"
+          - input: 3.50.0
+            expected: "3.50.0"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./
+        with:
+          version: ${{ matrix.version.input }}
+          repo-token: ${{ github.token }}
+      - shell: bash
+        run: |
+          [[ "$(task --version)" == "${{ matrix.version.expected }}" ]]
+
+  integration-invalid-version:
+    name: Integration - invalid version rejected
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - id: setup-task
+        continue-on-error: true
+        uses: ./
+        with:
+          version: 2.42.x
+      - if: steps.setup-task.outcome == 'success'
+        run: |
+          echo "::error::The action run was expected to fail, but passed!"
+          exit 1

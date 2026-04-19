@@ -23,15 +23,12 @@ tasks:
       - task: ts:validate
         vars:
           TSCONFIG_PATH: "./tsconfig.json"
-      - task: ts:validate
-        vars:
-          TSCONFIG_PATH: "./tsconfig.eslint.json"
 
   fix:
     desc: Make automated corrections to the project's files
     deps:
       - task: general:correct-spelling
-      - task: general:format-prettier
+      - task: general:format
       - task: markdown:fix
       - task: ts:build
       - task: ts:fix-lint
@@ -45,7 +42,7 @@ tasks:
       - task: npm:install-deps
     cmds:
       - wget --quiet --output-document="{{.ACTION_METADATA_SCHEMA_PATH}}" https://json.schemastore.org/github-action
-      - npx ajv-cli validate --strict=false -s "{{.ACTION_METADATA_SCHEMA_PATH}}" -d "action.yml"
+      - npx ajv validate --strict=false -s "{{.ACTION_METADATA_SCHEMA_PATH}}" -d "action.yml"
 
   docs:generate:
     desc: Create all generated documentation content
@@ -94,13 +91,12 @@ tasks:
     cmds:
       - poetry run codespell --write-changes
 
-  # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-prettier-formatting-task/Taskfile.yml
-  general:format-prettier:
-    desc: Format all supported files with Prettier
+  general:format:
+    desc: Format all supported files with oxfmt
     deps:
       - task: npm:install-deps
     cmds:
-      - npx prettier --write .
+      - npx oxfmt --write .
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-npm-dependencies-task/Taskfile.yml
   general:install-deps:
@@ -117,7 +113,7 @@ tasks:
     cmds:
       - |
         if [[ "{{.OS}}" == "Windows_NT" ]]; then
-          # npx --call uses the native shell, which makes it too difficult to use npx for this application on Windows,
+          # npx uses the native shell, which makes it too difficult to use it for this application on Windows,
           # so the Windows user is required to have markdown-link-check installed and in PATH.
           if ! which markdown-link-check &>/dev/null; then
             echo "markdown-link-check not found or not in PATH. Please install: https://github.com/tcort/markdown-link-check#readme"
@@ -140,18 +136,16 @@ tasks:
           done
           exit $STATUS
         else
-          npx --package=markdown-link-check --call='
-            STATUS=0
-            for file in \
-              $(find . -type d -name node_modules -prune -o -regex ".*[.]md" -print); do
-              markdown-link-check \
-                --quiet \
-                --config "./.markdown-link-check.json" \
-                "$file"
-              STATUS=$(( $STATUS + $? ))
-            done
-            exit $STATUS
-          '
+          STATUS=0
+          for file in \
+            $(find . -type d -name node_modules -prune -o -regex ".*[.]md" -print); do
+            npx markdown-link-check \
+              --quiet \
+              --config "./.markdown-link-check.json" \
+              "$file"
+            STATUS=$(( $STATUS + $? ))
+          done
+          exit $STATUS
         fi
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-markdown-task/Taskfile.yml
@@ -160,7 +154,7 @@ tasks:
     deps:
       - task: npm:install-deps
     cmds:
-      - npx markdownlint-cli --fix "**/*.md"
+      - npx markdownlint --fix "**/*.md"
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-markdown-task/Taskfile.yml
   markdown:lint:
@@ -168,13 +162,13 @@ tasks:
     deps:
       - task: npm:install-deps
     cmds:
-      - npx markdownlint-cli "**/*.md"
+      - npx markdownlint "**/*.md"
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/npm-task/Taskfile.yml
   npm:install-deps:
     desc: Install dependencies managed by npm
     cmds:
-      - npm install
+      - npm ci
 
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-npm-task/Taskfile.yml
   npm:validate:
@@ -204,6 +198,10 @@ tasks:
       NPM_BADGES_SCHEMA_URL: https://json.schemastore.org/npm-badges.json
       NPM_BADGES_SCHEMA_PATH:
         sh: task utility:mktemp-file TEMPLATE="npm-badges-schema-XXXXXXXXXX.json"
+      # Source: https://github.com/SchemaStore/schemastore/blob/master/src/schemas/json/nodemon.json
+      NODEMON_SCHEMA_URL: https://json.schemastore.org/nodemon.json
+      NODEMON_SCHEMA_PATH:
+        sh: task utility:mktemp-file TEMPLATE="nodemon-schema-XXXXXXXXXX.json"
       # Source: https://github.com/SchemaStore/schemastore/blob/master/src/schemas/json/partial-eslint-plugins.json
       PARTIAL_ESLINT_PLUGINS_SCHEMA_URL: https://json.schemastore.org/partial-eslint-plugins.json
       PARTIAL_ESLINT_PLUGINS_PATH:
@@ -233,6 +231,7 @@ tasks:
       - wget --quiet --output-document="{{.ESLINTRC_SCHEMA_PATH}}" {{.ESLINTRC_SCHEMA_URL}}
       - wget --quiet --output-document="{{.JSCPD_SCHEMA_PATH}}" {{.JSCPD_SCHEMA_URL}}
       - wget --quiet --output-document="{{.NPM_BADGES_SCHEMA_PATH}}" {{.NPM_BADGES_SCHEMA_URL}}
+      - wget --quiet --output-document="{{.NODEMON_SCHEMA_PATH}}" {{.NODEMON_SCHEMA_URL}}
       - wget --quiet --output-document="{{.PARTIAL_ESLINT_PLUGINS_PATH}}" {{.PARTIAL_ESLINT_PLUGINS_SCHEMA_URL}}
       - wget --quiet --output-document="{{.PRETTIERRC_SCHEMA_PATH}}" {{.PRETTIERRC_SCHEMA_URL}}
       - wget --quiet --output-document="{{.SEMANTIC_RELEASE_SCHEMA_PATH}}" {{.SEMANTIC_RELEASE_SCHEMA_URL}}
@@ -247,6 +246,7 @@ tasks:
           -r "{{.ESLINTRC_SCHEMA_PATH}}" \
           -r "{{.JSCPD_SCHEMA_PATH}}" \
           -r "{{.NPM_BADGES_SCHEMA_PATH}}" \
+          -r "{{.NODEMON_SCHEMA_PATH}}" \
           -r "{{.PARTIAL_ESLINT_PLUGINS_PATH}}" \
           -r "{{.PRETTIERRC_SCHEMA_PATH}}" \
           -r "{{.SEMANTIC_RELEASE_SCHEMA_PATH}}" \
@@ -272,21 +272,21 @@ tasks:
     deps:
       - task: npm:install-deps
     cmds:
-      - npx eslint --ext .js,.jsx,.ts,.tsx --fix .
+      - npx oxlint src/ __tests__/ --fix
 
   ts:lint:
     desc: Lint TypeScript code
     deps:
       - task: npm:install-deps
     cmds:
-      - npx eslint --ext .js,.jsx,.ts,.tsx .
+      - npx oxlint src/ __tests__/
 
   ts:test:
     desc: Test the action's TypeScript code.
     deps:
       - task: npm:install-deps
     cmds:
-      - npx jest
+      - npx vitest run
 
   ts:validate:
     desc: Validate TypeScript configuration file against its JSON schema
@@ -306,7 +306,7 @@ tasks:
       - |
         # TypeScript allows comments in tsconfig.json.
         # ajv-cli did not support comments in JSON at the 3.x version in use (support was added in a later version).
-        npx strip-json-comments-cli \
+        npx strip-json-comments \
           --no-whitespace \
           "{{.INSTANCE_PATH}}" \
           > "{{.WORKING_INSTANCE_PATH}}"

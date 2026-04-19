@@ -10,48 +10,49 @@
 // software without disclosing the source code of your own applications. To purchase
 // a commercial license, send an email to license@arduino.cc
 
-import path = require("path");
-import os = require("os");
-import fs = require("fs");
-import io = require("@actions/io");
-import nock = require("nock");
+import { join } from "node:path";
+import { arch } from "node:os";
+import { existsSync } from "node:fs";
+import { mkdirP, rmRF } from "@actions/io";
+import nock from "nock";
 
-const toolDir = path.join(__dirname, "runner", "tools");
-const tempDir = path.join(__dirname, "runner", "temp");
-const dataDir = path.join(__dirname, "testdata");
+const testDir = import.meta.dirname;
+const toolDir = join(testDir, "runner", "tools");
+const tempDir = join(testDir, "runner", "temp");
+const dataDir = join(testDir, "testdata");
 const IS_WINDOWS = process.platform === "win32";
 
 process.env.RUNNER_TEMP = tempDir;
 process.env.RUNNER_TOOL_CACHE = toolDir;
-import * as installer from "../src/installer"; // eslint-disable-line import/first
+import { getTask } from "../src/installer.js";
 
 describe("installer tests", () => {
   beforeEach(async () => {
-    await io.rmRF(toolDir);
-    await io.rmRF(tempDir);
-    await io.mkdirP(toolDir);
-    await io.mkdirP(tempDir);
+    await rmRF(toolDir);
+    await rmRF(tempDir);
+    await mkdirP(toolDir);
+    await mkdirP(tempDir);
   });
 
   afterAll(async () => {
     try {
-      await io.rmRF(toolDir);
-      await io.rmRF(tempDir);
+      await rmRF(toolDir);
+      await rmRF(tempDir);
     } catch {
       console.log("Failed to remove test directories");
     }
   });
 
   it("Downloads version of Task if no matching version is installed", async () => {
-    await installer.getTask("3.37.1", "");
-    const taskDir = path.join(toolDir, "task", "3.37.1", os.arch());
+    await getTask("3.37.1", "");
+    const taskDir = join(toolDir, "task", "3.37.1", arch());
 
-    expect(fs.existsSync(`${taskDir}.complete`)).toBe(true);
+    expect(existsSync(`${taskDir}.complete`)).toBe(true);
 
     if (IS_WINDOWS) {
-      expect(fs.existsSync(path.join(taskDir, "bin", "task.exe"))).toBe(true);
+      expect(existsSync(join(taskDir, "bin", "task.exe"))).toBe(true);
     } else {
-      expect(fs.existsSync(path.join(taskDir, "bin", "task"))).toBe(true);
+      expect(existsSync(join(taskDir, "bin", "task"))).toBe(true);
     }
   }, 100000);
 
@@ -59,7 +60,7 @@ describe("installer tests", () => {
     beforeEach(() => {
       nock("https://api.github.com")
         .get("/repos/go-task/task/releases?per_page=100")
-        .replyWithFile(200, path.join(dataDir, "releases.json"));
+        .replyWithFile(200, join(dataDir, "releases.json"));
     });
 
     afterEach(() => {
@@ -68,38 +69,38 @@ describe("installer tests", () => {
     });
 
     it("Gets the latest version of Task 3.36 using 3.36 and no matching version is installed", async () => {
-      await installer.getTask("3.36", "");
-      const taskDir = path.join(toolDir, "task", "3.36.0", os.arch());
+      await getTask("3.36", "");
+      const taskDir = join(toolDir, "task", "3.36.0", arch());
 
-      expect(fs.existsSync(`${taskDir}.complete`)).toBe(true);
+      expect(existsSync(`${taskDir}.complete`)).toBe(true);
       if (IS_WINDOWS) {
-        expect(fs.existsSync(path.join(taskDir, "bin", "task.exe"))).toBe(true);
+        expect(existsSync(join(taskDir, "bin", "task.exe"))).toBe(true);
       } else {
-        expect(fs.existsSync(path.join(taskDir, "bin", "task"))).toBe(true);
+        expect(existsSync(join(taskDir, "bin", "task"))).toBe(true);
       }
     });
 
     it("Gets latest version of Task using 3.x and no matching version is installed", async () => {
-      await installer.getTask("3.x", "");
-      const taskdir = path.join(toolDir, "task", "3.43.2", os.arch());
+      await getTask("3.x", "");
+      const taskdir = join(toolDir, "task", "3.43.2", arch());
 
-      expect(fs.existsSync(`${taskdir}.complete`)).toBe(true);
+      expect(existsSync(`${taskdir}.complete`)).toBe(true);
       if (IS_WINDOWS) {
-        expect(fs.existsSync(path.join(taskdir, "bin", "task.exe"))).toBe(true);
+        expect(existsSync(join(taskdir, "bin", "task.exe"))).toBe(true);
       } else {
-        expect(fs.existsSync(path.join(taskdir, "bin", "task"))).toBe(true);
+        expect(existsSync(join(taskdir, "bin", "task"))).toBe(true);
       }
     });
 
     it("Skips version computing when a valid semver is provided", async () => {
-      await installer.getTask("3.37.0", "");
-      const taskdir = path.join(toolDir, "task", "3.37.0", os.arch());
+      await getTask("3.37.0", "");
+      const taskdir = join(toolDir, "task", "3.37.0", arch());
 
-      expect(fs.existsSync(`${taskdir}.complete`)).toBe(true);
+      expect(existsSync(`${taskdir}.complete`)).toBe(true);
       if (IS_WINDOWS) {
-        expect(fs.existsSync(path.join(taskdir, "bin", "task.exe"))).toBe(true);
+        expect(existsSync(join(taskdir, "bin", "task.exe"))).toBe(true);
       } else {
-        expect(fs.existsSync(path.join(taskdir, "bin", "task"))).toBe(true);
+        expect(existsSync(join(taskdir, "bin", "task"))).toBe(true);
       }
     });
   });
