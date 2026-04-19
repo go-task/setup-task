@@ -2,11 +2,6 @@
 
 ## Unreleased
 
-## v2.0.0 - 2026-03-18
-
-- **BREAKING**: Upgraded to Node 24. Requires a GitHub Actions runner with
-  Node.js 24 support
-  ([#10](https://github.com/go-task/setup-task/pull/10) by @vmaerten).
 - Replaced `typed-rest-client` with `@actions/http-client` for GitHub API calls
   to eliminate the Node 24 `DEP0169` deprecation warning about `url.parse()`.
 - Modernized the TypeScript tooling stack (vitest, oxlint, `@actions/core@2`,
@@ -16,6 +11,12 @@
 - Upgraded `@actions/core` 2 → 3, `@actions/http-client` 2 → 4,
   `@actions/io` 2 → 3, `@actions/tool-cache` 2 → 4, `typescript` 5 → 6, and
   `markdownlint-cli` 0.47 → 0.48.
+
+## v2.0.0 - 2026-03-18
+
+- **BREAKING**: Upgraded to Node 24. Requires a GitHub Actions runner with
+  Node.js 24 support
+  ([#10](https://github.com/go-task/setup-task/pull/10) by @vmaerten).
 
 ## v1.1.0 - 2026-03-17
 
