@@ -13,6 +13,8 @@
 import { arch, platform } from "node:os";
 import { join } from "node:path";
 import { format } from "node:util";
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { HttpClient } from "@actions/http-client";
 import { rcompare, valid } from "semver";
 import { addPath, debug, info } from "@actions/core";
@@ -142,7 +144,30 @@ function getFileName() {
   return filename;
 }
 
-async function downloadRelease(version: string): Promise<string> {
+function verifyChecksum(path: string, expectedChecksum?: string): void {
+  if (!expectedChecksum) {
+    return;
+  }
+
+  const normalizedExpected = expectedChecksum.trim().toLowerCase();
+  if (!/^[a-f0-9]{64}$/.test(normalizedExpected)) {
+    throw new Error("The checksum input must be a SHA256 hex digest.");
+  }
+
+  const actualChecksum = createHash("sha256")
+    .update(readFileSync(path))
+    .digest("hex");
+  if (actualChecksum !== normalizedExpected) {
+    throw new Error(
+      `Downloaded Task archive checksum mismatch. Expected ${normalizedExpected}, got ${actualChecksum}.`,
+    );
+  }
+}
+
+async function downloadRelease(
+  version: string,
+  checksum?: string,
+): Promise<string> {
   // Download
   const fileName: string = getFileName();
   const downloadUrl: string = format(
@@ -150,7 +175,7 @@ async function downloadRelease(version: string): Promise<string> {
     version,
     fileName,
   );
-  let downloadPath: string | null = null;
+  let downloadPath = "";
   try {
     downloadPath = await downloadTool(downloadUrl);
   } catch (error) {
@@ -159,9 +184,10 @@ async function downloadRelease(version: string): Promise<string> {
     }
     throw new Error(`Failed to download version ${version}: ${error}`);
   }
+  verifyChecksum(downloadPath, checksum);
 
   // Extract
-  let extPath: string | null = null;
+  let extPath = "";
   if (osPlat === "win32") {
     extPath = await extractZip(downloadPath);
     // Create a bin/ folder and move `task` there
@@ -178,7 +204,12 @@ async function downloadRelease(version: string): Promise<string> {
   return cacheDir(extPath, "task", version);
 }
 
-export async function getTask(version: string, repoToken: string, maxRetries: number = 3) {
+export async function getTask(
+  version: string,
+  repoToken: string,
+  maxRetries: number = 3,
+  checksum?: string,
+) {
   // resolve the version number
   const targetVersion = await computeVersion(version, repoToken, maxRetries);
 
@@ -188,7 +219,7 @@ export async function getTask(version: string, repoToken: string, maxRetries: nu
 
   // if not: download, extract and cache
   if (!toolPath) {
-    toolPath = await downloadRelease(targetVersion);
+    toolPath = await downloadRelease(targetVersion, checksum);
     debug(`Task cached under ${toolPath}`);
   }
 

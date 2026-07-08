@@ -18,8 +18,9 @@ async function run() {
     const version = getInput("version", { required: true });
     const repoToken = getInput("repo-token");
     const maxRetries = parseInt(getInput("max-retries") || "3", 10);
+    const checksum = getInput("checksum");
 
-    await getTask(version, repoToken, maxRetries);
+    await getTask(version, repoToken, maxRetries, checksum || undefined);
   } catch (error) {
     if (error instanceof Error) {
       setFailed(error.message);
