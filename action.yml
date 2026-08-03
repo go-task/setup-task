@@ -17,6 +17,9 @@ inputs:
     description: "Maximum number of retry attempts for HTTP requests"
     required: false
     default: "3"
+  checksum:
+    description: "Expected SHA256 checksum of the downloaded Task archive"
+    required: false
 
 runs:
   using: "node24"

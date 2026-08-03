@@ -33751,6 +33751,10 @@ const external_node_os_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import
 const external_node_path_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path");
 // EXTERNAL MODULE: external "node:util"
 var external_node_util_ = __nccwpck_require__(7975);
+// EXTERNAL MODULE: external "node:crypto"
+var external_node_crypto_ = __nccwpck_require__(7598);
+;// CONCATENATED MODULE: external "node:fs"
+const external_node_fs_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:fs");
 // EXTERNAL MODULE: ./node_modules/semver/index.js
 var node_modules_semver = __nccwpck_require__(2088);
 ;// CONCATENATED MODULE: ./node_modules/@actions/tool-cache/lib/manifest.js
@@ -34571,6 +34575,8 @@ function _unique(values) {
 
 
 
+
+
 const osPlat = (0,external_node_os_namespaceObject.platform)();
 const osArch = (0,external_node_os_namespaceObject.arch)();
 // Retrieve a list of versions scraping tags from the Github API
@@ -34660,11 +34666,26 @@ function getFileName() {
     const filename = (0,external_node_util_.format)("task_%s_%s.%s", taskPlatform, taskArch, ext);
     return filename;
 }
-async function downloadRelease(version) {
+function verifyChecksum(path, expectedChecksum) {
+    if (!expectedChecksum) {
+        return;
+    }
+    const normalizedExpected = expectedChecksum.trim().toLowerCase();
+    if (!/^[a-f0-9]{64}$/.test(normalizedExpected)) {
+        throw new Error("The checksum input must be a SHA256 hex digest.");
+    }
+    const actualChecksum = (0,external_node_crypto_.createHash)("sha256")
+        .update((0,external_node_fs_namespaceObject.readFileSync)(path))
+        .digest("hex");
+    if (actualChecksum !== normalizedExpected) {
+        throw new Error(`Downloaded Task archive checksum mismatch. Expected ${normalizedExpected}, got ${actualChecksum}.`);
+    }
+}
+async function downloadRelease(version, checksum) {
     // Download
     const fileName = getFileName();
     const downloadUrl = (0,external_node_util_.format)("https://github.com/go-task/task/releases/download/%s/%s", version, fileName);
-    let downloadPath = null;
+    let downloadPath = "";
     try {
         downloadPath = await downloadTool(downloadUrl);
     }
@@ -34674,8 +34695,9 @@ async function downloadRelease(version) {
         }
         throw new Error(`Failed to download version ${version}: ${error}`);
     }
+    verifyChecksum(downloadPath, checksum);
     // Extract
-    let extPath = null;
+    let extPath = "";
     if (osPlat === "win32") {
         extPath = await extractZip(downloadPath);
         // Create a bin/ folder and move `task` there
@@ -34691,7 +34713,7 @@ async function downloadRelease(version) {
     // Install into the local tool cache - node extracts with a root folder that matches the fileName downloaded
     return cacheDir(extPath, "task", version);
 }
-async function getTask(version, repoToken, maxRetries = 3) {
+async function getTask(version, repoToken, maxRetries = 3, checksum) {
     // resolve the version number
     const targetVersion = await computeVersion(version, repoToken, maxRetries);
     // look if the binary is cached
@@ -34699,7 +34721,7 @@ async function getTask(version, repoToken, maxRetries = 3) {
     toolPath = find("task", targetVersion);
     // if not: download, extract and cache
     if (!toolPath) {
-        toolPath = await downloadRelease(targetVersion);
+        toolPath = await downloadRelease(targetVersion, checksum);
         core_debug(`Task cached under ${toolPath}`);
     }
     toolPath = (0,external_node_path_namespaceObject.join)(toolPath, "bin");
@@ -34726,7 +34748,8 @@ async function run() {
         const version = getInput("version", { required: true });
         const repoToken = getInput("repo-token");
         const maxRetries = parseInt(getInput("max-retries") || "3", 10);
-        await getTask(version, repoToken, maxRetries);
+        const checksum = getInput("checksum");
+        await getTask(version, repoToken, maxRetries, checksum || undefined);
     }
     catch (error) {
         if (error instanceof Error) {

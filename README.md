@@ -35,6 +35,10 @@ Can be an exact version (e.g., `3.4.2`) or a version range (e.g., `3.x`).
 
 **Default**: [`GITHUB_TOKEN`](https://docs.github.com/actions/security-guides/automatic-token-authentication)
 
+### `checksum`
+
+Expected SHA256 checksum of the downloaded Task archive.
+
 ## Usage
 
 To get the action's default version of Task just add this step:
