@@ -16,8 +16,8 @@ jobs:
     name: Lint (oxlint)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: "npm"
@@ -31,8 +31,8 @@ jobs:
     name: Validate tsconfig
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: "npm"
@@ -46,8 +46,8 @@ jobs:
     name: Validate action.yml
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: "npm"
@@ -61,8 +61,8 @@ jobs:
     name: Validate package.json
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: "npm"
@@ -76,8 +76,8 @@ jobs:
     name: Lockfile sync
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: "npm"
@@ -96,8 +96,8 @@ jobs:
       matrix:
         step: [lint, check-links]
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: "npm"
@@ -113,8 +113,8 @@ jobs:
     name: oxfmt formatting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: "npm"
@@ -131,7 +131,7 @@ jobs:
       EXPECTED_LICENSE_FILENAME: LICENSE
       EXPECTED_LICENSE_TYPE: GPL-3.0
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ruby
@@ -161,7 +161,7 @@ jobs:
     name: Deps license cache freshness
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - uses: ruby/setup-ruby@v1
@@ -171,7 +171,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           version: 5.x
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: "npm"
@@ -201,7 +201,7 @@ jobs:
     name: Deps license allowlist
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - uses: ruby/setup-ruby@v1
@@ -211,7 +211,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           version: 5.x
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: "npm"
@@ -225,8 +225,8 @@ jobs:
     name: Spell check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.14"
       - run: pip install poetry
@@ -244,8 +244,8 @@ jobs:
       matrix:
         operating-system: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: "npm"
@@ -259,8 +259,8 @@ jobs:
     name: dist bundle up to date
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: "npm"
@@ -276,7 +276,7 @@ jobs:
     name: Integration - defaults
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Run action with defaults
         uses: ./
       - run: task --version
@@ -296,7 +296,7 @@ jobs:
           - input: 3.50.0
             expected: "3.50.0"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./
         with:
           version: ${{ matrix.version.input }}
@@ -309,7 +309,7 @@ jobs:
     name: Integration - invalid version rejected
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - id: setup-task
         continue-on-error: true
         uses: ./

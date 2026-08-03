@@ -33,10 +33,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: "npm"
@@ -114,7 +114,7 @@ jobs:
           echo "::set-output name=flag::--dry-run"
 
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Download configuration file artifacts
         uses: actions/download-artifact@v8
@@ -129,7 +129,7 @@ jobs:
           name: ${{ env.CONFIGURATIONS_ARTIFACT_PREFIX }}*
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: "npm"
