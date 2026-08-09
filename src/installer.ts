@@ -154,9 +154,7 @@ function verifyChecksum(path: string, expectedChecksum?: string): void {
     throw new Error("The checksum input must be a SHA256 hex digest.");
   }
 
-  const actualChecksum = createHash("sha256")
-    .update(readFileSync(path))
-    .digest("hex");
+  const actualChecksum = createHash("sha256").update(readFileSync(path)).digest("hex");
   if (actualChecksum !== normalizedExpected) {
     throw new Error(
       `Downloaded Task archive checksum mismatch. Expected ${normalizedExpected}, got ${actualChecksum}.`,
@@ -164,10 +162,7 @@ function verifyChecksum(path: string, expectedChecksum?: string): void {
   }
 }
 
-async function downloadRelease(
-  version: string,
-  checksum?: string,
-): Promise<string> {
+async function downloadRelease(version: string, checksum?: string): Promise<string> {
   // Download
   const fileName: string = getFileName();
   const downloadUrl: string = format(

@@ -34674,9 +34674,7 @@ function verifyChecksum(path, expectedChecksum) {
     if (!/^[a-f0-9]{64}$/.test(normalizedExpected)) {
         throw new Error("The checksum input must be a SHA256 hex digest.");
     }
-    const actualChecksum = (0,external_node_crypto_.createHash)("sha256")
-        .update((0,external_node_fs_namespaceObject.readFileSync)(path))
-        .digest("hex");
+    const actualChecksum = (0,external_node_crypto_.createHash)("sha256").update((0,external_node_fs_namespaceObject.readFileSync)(path)).digest("hex");
     if (actualChecksum !== normalizedExpected) {
         throw new Error(`Downloaded Task archive checksum mismatch. Expected ${normalizedExpected}, got ${actualChecksum}.`);
     }
