@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v2.2.0 - 2026-08-09
+
 - Added a `checksum` input to verify the SHA256 digest of the downloaded Task
   archive ([#16](https://github.com/go-task/setup-task/pull/16) by @illera88).
 - Updated development dependencies: `typescript` 6 → 7, `@vercel/ncc` 0.38 →
