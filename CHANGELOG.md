@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Added a `checksum` input to verify the SHA256 digest of the downloaded Task
+  archive ([#16](https://github.com/go-task/setup-task/pull/16) by @illera88).
+- Updated development dependencies: `typescript` 6 → 7, `@vercel/ncc` 0.38 →
+  0.44, `markdownlint-cli` 0.48 → 0.49, and `oxfmt` 0.50 → 0.62
+  ([#15](https://github.com/go-task/setup-task/pull/15)).
+
 ## v2.1.0 - 2026-05-17
 
 - Replaced `typed-rest-client` with `@actions/http-client` for GitHub API calls
