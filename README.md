@@ -11,13 +11,13 @@
   <p>
     A <a href="https://docs.github.com/en/actions">GitHub Actions</a> action that makes the <a href="https://taskfile.dev">Task</a> task runner / build tool available to use in your workflow.
   </p>
-
+Pathum25 
   <p>
     <a href="https://taskfile.dev/installation/">Installation</a> | <a href="https://taskfile.dev/usage/">Documentation</a> | <a href="https://twitter.com/taskfiledev">Twitter</a> | <a href="https://bsky.app/profile/taskfile.dev">Bluesky</a> | <a href="https://fosstodon.org/@task">Mastodon</a> | <a href="https://discord.gg/6TY36E39UK">Discord</a>
   </p>
 </div>
 
-[![CI status](https://github.com/go-task/setup-task/actions/workflows/ci.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/ci.yml)
+[![CI status](https://github.com/go-task/setup-task/actions/workflows/ci.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/pathum25/.yml)
 [![Sync Labels status](https://github.com/go-task/setup-task/actions/workflows/sync-labels-npm.yml/badge.svg)](https://github.com/go-task/setup-task/actions/workflows/sync-labels-npm.yml)
 
 ## Inputs
