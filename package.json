@@ -26,18 +26,18 @@
     "@actions/io": "^3.0.2",
     "@types/node": "^25.6.0",
     "@types/semver": "^7.7.1",
-    "@vercel/ncc": "^0.44.0",
+    "@vercel/ncc": "^0.45.0",
     "ajv-cli": "^5.0.0",
     "ajv-formats": "^3.0.1",
     "github-label-sync": "3.0.0",
     "markdown-link-check": "^3.14.2",
     "markdownlint-cli": "^0.49.0",
     "nock": "^13.5.6",
-    "oxfmt": "^0.62.0",
+    "oxfmt": "^0.66.0",
     "oxlint": "^1.60.0",
     "strip-json-comments-cli": "^3.0.0",
     "typescript": "^7.0.0",
-    "vitest": "^4.1.4"
+    "vitest": "^5.0.0"
   },
   "engines": {
     "node": "24.x"
